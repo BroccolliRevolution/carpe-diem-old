@@ -1,4 +1,4 @@
- import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import firebase from 'firebase'
 import firebaseConfig from './config/firebase-config'
@@ -15,7 +15,7 @@ function App() {
     console.log('database SUBSCRIBED!')
     return db.collection("messages")
     .onSnapshot(function(querySnapshot) {
-        var cities = [];
+        var cities = []
         querySnapshot.forEach(doc => 
             cities.push({
               id: doc.id,
@@ -37,10 +37,10 @@ function App() {
   const saveFirebase = (e) => {
     db.collection("messages").add({title})
     .then(function(docRef) {
-        console.log("Document written with ID: ", docRef.id);
+        console.log("Document written with ID: ", docRef.id)
     })
     .catch(function(error) {
-        console.error("Error adding document: ", error);
+        console.error("Error adding document: ", error)
     });
   }
 
@@ -55,7 +55,6 @@ function App() {
       <input type="text" placeholder="First Name" onChange={e => setTitle(e.target.value)} value={title} />
       <button onClick={saveFirebase}>SAVE</button>
       <p>{title}</p>
-
       <ul>{listItems}</ul>
     </div>
   );
