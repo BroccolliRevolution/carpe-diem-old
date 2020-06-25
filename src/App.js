@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import firebase from 'firebase'
 import firebaseConfig from './config/firebase-config'
@@ -9,7 +9,6 @@ var db = firebase.firestore();
 function App() {
   const [title, setTitle] = useState('coje');
   const [entries, setEntries] = useState([]);
-  const didMount = useRef(false);
 
   const subscribeFirebase = () => {
     console.log('database SUBSCRIBED!')
@@ -27,12 +26,8 @@ function App() {
   } 
 
   useEffect(() => {
-  
-    if (didMount.current) return
-    didMount.current = true;
     subscribeFirebase()
-  
-  });
+  }, []);
 
   const saveFirebase = (e) => {
     db.collection("messages").add({title})
