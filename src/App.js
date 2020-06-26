@@ -56,12 +56,7 @@ function App() {
             datetime: datetimeStr
           })
 
-
-        }
-
-        )
-
-        console.log(activities)
+        })
         setActivities(items => [...activities])
       })
   }
@@ -126,22 +121,46 @@ function App() {
     setTitle('')
   }
 
+
+  const onKeyPressed = (event) => {
+    try {
+      const activity = entries[(+event.key) - 1].title
+      checkActivity(activity)
+    } catch (e) {
+      console.log(e)
+    }
+    
+
+  }
+
   return (
     <div className="App">
-      <div className="wrapper">
-        <div className="new-task">
-          <label htmlFor="task-name-input">Add new task</label><input type="text" id="task-name-input" onKeyDown={handleKeyDown} onChange={e => setTitle(e.target.value)} value={title} />
-          <button onClick={saveFirebase}>SAVE</button>
-          <p>{title}</p>
-        </div>
-        <div className="tasks-wrapper">
-          <h3>Tasks</h3>
-          <ol className="tasklist">{listTasks}</ol>
-        </div>
-        <div className="task-log">
-          <ol className="loglist">{listActivities}</ol>
+      <div className="super-wrapper" onKeyDown={onKeyPressed} tabIndex="0">
+        <div className="wrapper">
+  {/* 
+        <div 
+      className="player"
+      style={{ position: "absolute", width: '200px', height: '100px', background: 'yellow' }}
+      onKeyDown={onKeyPressed}
+      tabIndex="0"
+    ></div> */}
+
+          <div className="new-task">
+            <label htmlFor="task-name-input">Add new task</label>
+            <input type="text" id="task-name-input" onKeyDown={handleKeyDown} onChange={e => setTitle(e.target.value)} value={title} />
+            <button onClick={saveFirebase}>SAVE</button>
+            <p>{title}</p>
+          </div>
+          <div className="tasks-wrapper">
+            <h3>Tasks</h3>
+            <ol className="tasklist">{listTasks}</ol>
+          </div>
+          <div className="task-log">
+            <ol className="loglist">{listActivities}</ol>
+          </div>
         </div>
       </div>
+     
     </div>
   );
 }
