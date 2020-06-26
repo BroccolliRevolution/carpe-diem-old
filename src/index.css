@@ -11,3 +11,32 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 30px;
+  height: 80px;
+}
+
+
+.new-task {
+  flex: 1 1 100%;
+  margin-top: 30px;
+  height: 80px;
+}
+
+.tasks-wrapper {
+  flex: 1 1 50%;
+}
+
+.task-log {
+  flex: 1 1 50%;
+}
+
+.tasklist, .loglist {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+}
