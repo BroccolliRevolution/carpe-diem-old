@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import firebase from 'firebase'
 import firebaseConfig from './config/firebase-config'
@@ -29,7 +29,7 @@ function App() {
   const [activities, setActivities] = useState([]);
   const [auth, setAuth] = useState('ok');
 
- 
+
   const setTasksByType = type => {
     db.collection("tasks").where("type", "==", type).orderBy("order")
       .onSnapshot(function (querySnapshot) {
@@ -50,7 +50,7 @@ function App() {
 
   const subscribeFirebase = () => {
     console.log('database SUBSCRIBED!')
-    
+
     function myDateFormat(dateIn) {
       var yyyy = dateIn.getFullYear()
       var mm = dateIn.getMonth() + 1
@@ -87,61 +87,38 @@ function App() {
         })
         setActivities(items => [...activities])
 
-        // console.log(activities.map(({task}) => task))
-        // const todaysActivities = activities.map(({task}) => task)
-
-        // setDailies(dailies => dailies.filter(daily => !todaysActivities.includes(daily)))
-      
-        // db.collection("tasks")
-        // .where("type", "==", 'dailies')
-        // .where(firebase.firestore.FieldPath.documentId(), 'in', todaysActivities)
-        // //.orderBy("order")
-        // .onSnapshot(function (querySnapshot) {
-        //   var tasks = []
-        //   querySnapshot.forEach(doc =>
-        //     tasks.push({
-        //       id: doc.id,
-        //       title: doc.data().title,
-        //       type: doc.data().type
-        //     })
-        //   )
-        //   setDailies(items => [...tasks])
-        // })
-
-
-        
-
       })
 
+    db.collection("tasks").orderBy("order")
+      .onSnapshot(function (querySnapshot) {
+        var tasks = []
+        querySnapshot.forEach(doc =>
+          tasks.push({
+            id: doc.id,
+            title: doc.data().title,
+            type: doc.data().type
+          })
+        )
 
-// TODO THIS ONE???
+
+        let tasksByType = tasks.reduce((prev, curr) => {
+          if (!prev[curr.type]) prev[curr.type] = []
+          prev[curr.type] = [...prev[curr.type], curr]
+          return prev
+        }, {})
+
+        const { dailies, habits, chores } = tasksByType
+        setDailies(items => [...dailies])
+        setHabits(items => [...habits])
+        setChores(items => [...chores])
 
 
-      // db.collection("tasks").where("type", "==", type).orderBy("order")
-      // .onSnapshot(function (querySnapshot) {
-      //   var tasks = []
-      //   querySnapshot.forEach(doc =>
-      //     tasks.push({
-      //       id: doc.id,
-      //       title: doc.data().title,
-      //       type: doc.data().type
-      //     })
-      //   )
-
-      //   if (type === 'habits') setHabits(items => [...tasks])
-      //   if (type === 'chores') setChores(items => [...tasks])
-      //   if (type === 'dailies') setDailies(items => [...tasks])
-      // })
-
-      // Grab them all at once and sort them via reduce
-      setTasksByType('habits')
-      setTasksByType('chores')
-      setTasksByType('dailies')
+      })
   }
 
   const getAuth = () => {
-    
-    firebase.auth().onAuthStateChanged(function(user) {
+
+    firebase.auth().onAuthStateChanged(function (user) {
       setAuth('yep')
       window.user = user; // user is undefined if no user signed in
       if (!user) {
@@ -186,7 +163,7 @@ function App() {
       'Stretches',
     ]
 
-    
+
     // or maybe auxiliary? or hobbies?
     const habits = [
       'Project',
@@ -201,7 +178,7 @@ function App() {
       'FOOD',
       'NAP',
     ]
-    
+
     const chores = [
       'Chores',
       'TODOs',
@@ -230,7 +207,7 @@ function App() {
       'Cardio',
       'Meditation',
       'Podcast',
-      
+
       'Project',
       'Computerphile',
       'Art',
@@ -242,7 +219,7 @@ function App() {
       'Other Education',
       'FOOD',
       'NAP',
-      
+
       'Chores',
       'Musings',
       'TODOs',
@@ -251,43 +228,43 @@ function App() {
       'Review',
       'Books Notes',
       'Idea Map',
-      ]
+    ]
 
-      const getType = taskId => {
-        if (dailies.includes(taskId)) return 'dailies'
-        if (habits.includes(taskId)) return 'habits'
-        if (chores.includes(taskId)) return 'chores'
-      }
+    const getType = taskId => {
+      if (dailies.includes(taskId)) return 'dailies'
+      if (habits.includes(taskId)) return 'habits'
+      if (chores.includes(taskId)) return 'chores'
+    }
 
-      tasksToUpdate.forEach((taskId, id) => {
+    tasksToUpdate.forEach((taskId, id) => {
 
-        const type = getType(taskId);
-        console.log(type, taskId)
-        
-        
-        db.collection("tasks").doc(taskId).set({
-          order: id,
-          importance: 100,
-          level: 1,
-          categories: ['health', 'sport'],
-          isDaily: true,
-          type
+      const type = getType(taskId);
+      console.log(type, taskId)
+
+
+      db.collection("tasks").doc(taskId).set({
+        order: id,
+        importance: 100,
+        level: 1,
+        categories: ['health', 'sport'],
+        isDaily: true,
+        type
+      })
+        .then(function () {
+          console.log("Document successfully written!");
         })
-        .then(function() {
-            console.log("Document successfully written!");
-        })
-        .catch(function(error) {
-            console.error("Error writing document: ", error);
+        .catch(function (error) {
+          console.error("Error writing document: ", error);
         });
 
-      })
+    })
 
-    
+
   }
 
   const saveFirebase = (e) => {
 
-    
+
     if (title == '') return
 
     const item = {
@@ -324,97 +301,64 @@ function App() {
   }
 
 
-  const getTaskList = tasks => tasks.map(({ id, type }) =>
-    {
-      return (
-        <li key={id}>
-          <button onClick={e => checkActivity(id)}>SAVE</button>
-          {id} - {type}
-        </li>
-      )
-    }
+  const getTaskList = tasks => tasks.map(({ id, type }) => {
+    return (
+      <li key={id}>
+        <button onClick={e => checkActivity(id)}>SAVE</button>
+        {id} - {type}
+      </li>
+    )
+  }
   )
 
   const getDailies = () => {
-        const todaysActivities = activities.map(({task}) => task)
+    const todaysActivities = activities.map(({ task }) => task)
+    const dailiesToRender = dailies.filter(({ id }) => !todaysActivities.includes(id))
 
-        //setDailies(dailies => dailies.filter(daily => !todaysActivities.includes(daily)))
-
-
-        const dailiesToRender = dailies.filter(({id}) => !todaysActivities.includes(id))
-        console.log(dailiesToRender)
-        
+    return (
+      dailiesToRender.map(({ id, type }) => {
         return (
-          dailiesToRender.map(({ id, type }) =>
-          {
-            return (
-              <li key={id}>
-                <button onClick={e => checkActivity(id)}>SAVE</button>
-                {id} - {type}
-              </li>
-            )
-          }
+          <li key={id}>
+            <button onClick={e => checkActivity(id)}>SAVE</button>
+            {id} - {type}
+          </li>
         )
+      }
       )
-        return 'TO BE RENDERED'
+    )
   }
 
   const listTasks = () => {
-    // let tasksByType = entries.reduce((prev, curr) => {
-    //   if (!prev[curr.type]) prev[curr.type] = []
-    //   prev[curr.type] = [...prev[curr.type], curr]
-    //   return prev
-    // }, {})
-    
-    //console.log(getTaskList(tasksByType['dailies']))
-    
-    //console.log(tasksByType['dailies'], tasksByType)
-    
     return (
       <div className="all-tasks">
         <ol className="dailies">
           {getDailies()}
         </ol>
-        
+
         <ol className="habits">
           {getTaskList(habits)}
         </ol>
-        
+
         <ol className="chores">
           {getTaskList(chores)}
         </ol>
-        
+
       </div>
     )
-    
-    // return (
-    //   <div className="tasks-by-type">
-    //     <h3>Dailies</h3>
-    //     <ul></ul>
-    //     <h3>Habbits</h3>
-    //     <ul></ul>
-    //     <h3>Chores</h3>
-    //     <ul></ul>
-    //   </div>
-    // )
   }
-  
+
 
   const updateGrade = (activityId, grade) => {
-    console.log(activityId)
     var activityRef = db.collection('activities').doc(activityId);
-
-  
-    return activityRef.update({
-        grade
-    })
-    .then(function() {
+    activityRef
+      .update({ grade })
+      .then(function () {
         console.log("Document successfully updated!");
-    })
-    .catch(function(error) {
+      })
+      .catch(function (error) {
         // The document probably doesn't exist.
         console.error("Error updating document: ", error);
-    });
+      });
   }
 
   const listActivities = activities.map(({ task, id, timestamp, datetime, grade }) =>
@@ -423,7 +367,7 @@ function App() {
       <button className="grade-btn" disabled={grade == 100} onClick={() => updateGrade(id, 100)}>just</button>
       <button className="grade-btn" disabled={grade == 200} onClick={() => updateGrade(id, 200)}>ok</button>
       <button className="grade-btn" disabled={grade == 300} onClick={() => updateGrade(id, 300)}>great</button>
-      
+
       <button className="grade-btn" onClick={() => checkActivity(task)}>REPEAT</button>
 
     </li>
@@ -444,7 +388,7 @@ function App() {
       // TODO change entries to dailies or other
       const activity = entries[index].title
       console.log(activity, index)
-      
+
       //checkActivity(activity)
     } catch (e) {
       console.log(e)
@@ -457,7 +401,7 @@ function App() {
       <h1>this is the auth: {auth}</h1>
       <div className="super-wrapper" onKeyDown={onKeyPressed} tabIndex="0">
         <div className="wrapper">
-  {/* 
+          {/* 
         <div 
       className="player"
       style={{ position: "absolute", width: '200px', height: '100px', background: 'yellow' }}
@@ -465,7 +409,7 @@ function App() {
       tabIndex="0"
     ></div> */}
 
-          
+
           <div className="tasks-wrapper">
             <h3>Tasks</h3>
             <div className="tasklist">
@@ -485,7 +429,7 @@ function App() {
           </div>
         </div>
       </div>
-     
+
     </div>
   );
 }
