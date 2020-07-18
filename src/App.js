@@ -303,9 +303,11 @@ function App() {
 
   const getTaskList = tasks => tasks.map(({ id, type }) => {
     return (
-      <li key={id}>
+      <li key={id} className="task">
         <button onClick={e => checkActivity(id)}>SAVE</button>
-        {id} - {type}
+        <span className="task-title">
+          {id} - {type}
+        </span>
       </li>
     )
   }
@@ -315,30 +317,23 @@ function App() {
     const todaysActivities = activities.map(({ task }) => task)
     const dailiesToRender = dailies.filter(({ id }) => !todaysActivities.includes(id))
 
-    return (
-      dailiesToRender.map(({ id, type }) => {
-        return (
-          <li key={id}>
-            <button onClick={e => checkActivity(id)}>SAVE</button>
-            {id} - {type}
-          </li>
-        )
-      }
-      )
-    )
+    return getTaskList(dailiesToRender)
   }
 
   const listTasks = () => {
     return (
       <div className="all-tasks">
+        <h3>Dailies</h3>
         <ol className="dailies">
           {getDailies()}
         </ol>
 
+        <h3>Habits</h3>
         <ol className="habits">
           {getTaskList(habits)}
         </ol>
 
+        <h3>Chores</h3>
         <ol className="chores">
           {getTaskList(chores)}
         </ol>
@@ -397,8 +392,6 @@ function App() {
 
   return (
     auth === 'yep' && <div className="App">
-
-      <h1>this is the auth: {auth}</h1>
       <div className="super-wrapper" onKeyDown={onKeyPressed} tabIndex="0">
         <div className="wrapper">
           {/* 
