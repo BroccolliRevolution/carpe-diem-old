@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import firebase from 'firebase'
 import firebaseConfig from './config/firebase-config'
+import Testik from './Testik';
 
 firebase.initializeApp(firebaseConfig)
 var db = firebase.firestore();
@@ -14,7 +15,7 @@ var provider = new firebase.auth.GoogleAuthProvider();
  firebase.auth().signInWithPopup(provider); // Opens a popup window and returns a promise to handle errors.
 
  firebase.auth().onAuthStateChanged(function(user) {
-  window.user = user; // user is undefined if no user signed in
+  window.user = user; //  is undefined if no user signed in
  });
 
  */
@@ -30,27 +31,9 @@ function App() {
   const [auth, setAuth] = useState('ok');
 
 
-  const setTasksByType = type => {
-    db.collection("tasks").where("type", "==", type).orderBy("order")
-      .onSnapshot(function (querySnapshot) {
-        var tasks = []
-        querySnapshot.forEach(doc =>
-          tasks.push({
-            id: doc.id,
-            title: doc.data().title,
-            type: doc.data().type
-          })
-        )
-
-        if (type === 'habits') setHabits(items => [...tasks])
-        if (type === 'chores') setChores(items => [...tasks])
-        if (type === 'dailies') setDailies(items => [...tasks])
-      })
-  }
-
   const subscribeFirebase = () => {
     console.log('database SUBSCRIBED!')
-
+    
     function myDateFormat(dateIn) {
       var yyyy = dateIn.getFullYear()
       var mm = dateIn.getMonth() + 1
@@ -323,9 +306,11 @@ function App() {
   const listTasks = () => {
     return (
       <div className="all-tasks">
+        
         <h3>Dailies</h3>
         <ol className="dailies">
-          {getDailies()}
+        {getTaskList(dailies)}
+          {/* {getDailies()} */}
         </ol>
 
         <h3>Habits</h3>
@@ -336,6 +321,10 @@ function App() {
         <h3>Chores</h3>
         <ol className="chores">
           {getTaskList(chores)}
+        </ol>
+
+        <ol className="dailies">
+          {getDailies()}
         </ol>
 
       </div>
@@ -404,10 +393,16 @@ function App() {
 
 
           <div className="tasks-wrapper">
-            <h3>Tasks</h3>
             <div className="tasklist">
               {listTasks()}
             </div>
+          </div>
+          <div className="dailies-list">
+            <ol>
+              {
+                getDailies().map(daily => daily)
+              }
+            </ol>
           </div>
           <div className="task-log">
             <h3>Recent activity</h3>
