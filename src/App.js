@@ -33,7 +33,7 @@ function App() {
 
   const subscribeFirebase = () => {
     console.log('database SUBSCRIBED!')
-    
+
     function myDateFormat(dateIn) {
       var yyyy = dateIn.getFullYear()
       var mm = dateIn.getMonth() + 1
@@ -306,10 +306,10 @@ function App() {
   const listTasks = () => {
     return (
       <div className="all-tasks">
-        
+
         <h3>Dailies</h3>
         <ol className="dailies">
-        {getTaskList(dailies)}
+          {getTaskList(dailies)}
           {/* {getDailies()} */}
         </ol>
 
@@ -318,14 +318,8 @@ function App() {
           {getTaskList(habits)}
         </ol>
 
-        <h3>Chores</h3>
-        <ol className="chores">
-          {getTaskList(chores)}
-        </ol>
 
-        <ol className="dailies">
-          {getDailies()}
-        </ol>
+
 
       </div>
     )
@@ -398,10 +392,13 @@ function App() {
             </div>
           </div>
           <div className="dailies-list">
-            <ol>
-              {
-                getDailies().map(daily => daily)
-              }
+            <h3>Dailies Left</h3>
+            <ol className="dailies">
+              {getDailies()}
+            </ol>
+            <h3>Chores</h3>
+            <ol className="chores">
+              {getTaskList(chores)}
             </ol>
           </div>
           <div className="task-log">

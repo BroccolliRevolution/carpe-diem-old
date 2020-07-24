@@ -52,11 +52,17 @@
 }
 
 .tasks-wrapper {
-  flex: 1 1 30%;
+  flex: 1 1 12%;
+}
+
+.dailies-list {
+  flex: 1 1 12%;
+  min-width: 120px;
 }
 
 .task-log {
   flex: 1 1 30%;
+ 
 }
 
 .tasklist, .loglist {
@@ -77,6 +83,7 @@
 
 .task {
   text-align: left;
+  margin-bottom: 7px;
 }
 
 
