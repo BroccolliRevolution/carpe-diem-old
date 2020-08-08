@@ -322,7 +322,7 @@ function App() {
   const getDailies = () => {
     const todaysActivities = activities.map(({ task }) => task)
     const dailiesFilteredSorted = dailies
-      //.filter(({ id }) => !todaysActivities.includes(id))
+      .filter(({ id }) => !todaysActivities.includes(id))
       .sort((a, b) => a.order - b.order)
     const dailiesToRender = dailiesFilteredSorted.map((daily, i) => {
       const nextDaily = dailiesFilteredSorted[i - 1] || 0
