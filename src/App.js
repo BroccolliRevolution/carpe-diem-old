@@ -64,6 +64,7 @@ function App() {
             grade: doc.data().grade,
             task: doc.data().task,
             timestamp: doc.data().timestamp,
+            partOfDay: doc.data().partOfDay,
             datetime: datetimeStr
           })
 
@@ -75,11 +76,14 @@ function App() {
     db.collection("tasks").orderBy("order")
       .onSnapshot(function (querySnapshot) {
         var tasks = []
+
+        // DEFINE tasks properties
         querySnapshot.forEach(doc =>
           tasks.push({
             id: doc.id,
             title: doc.data().title,
-            type: doc.data().type
+            type: doc.data().type,
+            partOfDay: doc.data().partOfDay
           })
         )
 
@@ -173,11 +177,34 @@ function App() {
       'Musings',
     ]
 
+
+    const dailiesToUpdate = [
+      { name: 'Tibetans', d: 'morning' },
+      { name: 'Journal', d: 'morning' },
+      { name: 'Tech Podcast', d: 'morning' },
+      { name: 'Cardio', d: 'morning' },
+      { name: 'Audiobook', d: 'morning' },
+      { name: 'Book', d: 'morning' },
+      { name: 'Exercise', d: 'morning' },
+      { name: 'Yoga', d: '' },
+      { name: 'Meditation', d: 'morning' },
+      { name: 'MOOC', d: 'afternoon' },
+      { name: 'Tech Course', d: 'afternoon' },
+      { name: 'Podcast', d: 'afternoon' },
+      { name: 'Stretches', d: 'evening' },
+      { name: 'Medium', d: 'evening' },
+      { name: 'Duolingo', d: 'evening' },
+      { name: 'Elevate', d: 'evening' },
+    ]
+
+
+
     const tasksToUpdate = [
       'Tibetans',
       'Journal',
       'Exercise',
       'Yoga',
+      'Cardio',
       'Book',
       'Medium',
       'Duolingo',
@@ -187,30 +214,29 @@ function App() {
       'MOOC',
       'Tech Course',
       'Stretches',
-      'Cardio',
       'Meditation',
       'Podcast',
 
-      'Project',
-      'Computerphile',
-      'Art',
-      'CuriosityStream',
-      'Science Festival',
-      'Firebase Tutorial',
-      'Cheery Friday',
-      'Leisure',
-      'Other Education',
-      'FOOD',
-      'NAP',
+      // 'Project',
+      // 'Computerphile',
+      // 'Art',
+      // 'CuriosityStream',
+      // 'Science Festival',
+      // 'Firebase Tutorial',
+      // 'Cheery Friday',
+      // 'Leisure',
+      // 'Other Education',
+      // 'FOOD',
+      // 'NAP',
 
-      'Chores',
-      'Musings',
-      'TODOs',
-      'Bookmarks, Articles',
-      'Cleanup Tabs, Papers',
-      'Review',
-      'Books Notes',
-      'Idea Map',
+      // 'Chores',
+      // 'Musings',
+      // 'TODOs',
+      // 'Bookmarks, Articles',
+      // 'Cleanup Tabs, Papers',
+      // 'Review',
+      // 'Books Notes',
+      // 'Idea Map',
     ]
 
     const getType = taskId => {
@@ -219,19 +245,16 @@ function App() {
       if (chores.includes(taskId)) return 'chores'
     }
 
-    tasksToUpdate.forEach((taskId, id) => {
+    // UNCOMMENT THIS TO MAKE THIS WORK
+    return
 
-      const type = getType(taskId);
-      console.log(type, taskId)
+    dailiesToUpdate.forEach((task, id) => {
 
 
-      db.collection("tasks").doc(taskId).set({
-        order: id,
-        importance: 100,
-        level: 1,
-        categories: ['health', 'sport'],
-        isDaily: true,
-        type
+
+      db.collection("tasks").doc(task.name).update({
+        partOfDay: task.d,
+        order: (id + 1)
       })
         .then(function () {
           console.log("Document successfully written!");
@@ -284,12 +307,12 @@ function App() {
   }
 
 
-  const getTaskList = tasks => tasks.map(({ id, type }) => {
+  const getTaskList = tasks => tasks.map(({ id, type, newSection }) => {
     return (
-      <li key={id} className="task">
+      <li key={id} className="task" style={{ marginTop: newSection ? "30px" : "0"}}>
         <button onClick={e => checkActivity(id)}>SAVE</button>
         <span className="task-title">
-          {id} - {type}
+          {id}
         </span>
       </li>
     )
@@ -298,7 +321,19 @@ function App() {
 
   const getDailies = () => {
     const todaysActivities = activities.map(({ task }) => task)
-    const dailiesToRender = dailies.filter(({ id }) => !todaysActivities.includes(id))
+    const dailiesFilteredSorted = dailies
+      //.filter(({ id }) => !todaysActivities.includes(id))
+      .sort((a, b) => a.order - b.order)
+    const dailiesToRender = dailiesFilteredSorted.map((daily, i) => {
+      const nextDaily = dailiesFilteredSorted[i - 1] || 0
+      if (nextDaily.partOfDay !== daily.partOfDay)
+        return {newSection: true, ...daily}
+      return daily
+      
+    })
+
+    console.log(dailiesToRender)
+    
 
     return getTaskList(dailiesToRender)
   }
@@ -306,7 +341,6 @@ function App() {
   const listTasks = () => {
     return (
       <div className="all-tasks">
-
         <h3>Dailies</h3>
         <ol className="dailies">
           {getTaskList(dailies)}
@@ -317,10 +351,6 @@ function App() {
         <ol className="habits">
           {getTaskList(habits)}
         </ol>
-
-
-
-
       </div>
     )
   }
