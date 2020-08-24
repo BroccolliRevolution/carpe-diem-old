@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import firebase from 'firebase'
 import firebaseConfig from './config/firebase-config'
-import Testik from './Testik';
+import { BsArrowRepeat } from 'react-icons/bs';
 
 firebase.initializeApp(firebaseConfig)
 var db = firebase.firestore();
@@ -24,11 +24,15 @@ var provider = new firebase.auth.GoogleAuthProvider();
 function App() {
   const [title, setTitle] = useState('');
   const [entries, setEntries] = useState([]);   // TODO get rid of entries - no more used
+  const [marked, setMarked] = useState([]);
   const [dailies, setDailies] = useState([]);
   const [habits, setHabits] = useState([]);
   const [chores, setChores] = useState([]);
   const [activities, setActivities] = useState([]);
   const [auth, setAuth] = useState('ok');
+
+  const doneColors = ['#0080004f', ' #008000a3', ' #008000c9', ' #008000']
+  const notDoneColor = '#c3c7a71f'
 
 
   const subscribeFirebase = () => {
@@ -73,7 +77,7 @@ function App() {
 
       })
 
-    db.collection("tasks").orderBy("order")
+    db.collection("tasks").orderBy("order").where("active", "==", true)
       .onSnapshot(function (querySnapshot) {
         var tasks = []
 
@@ -81,11 +85,16 @@ function App() {
         querySnapshot.forEach(doc =>
           tasks.push({
             id: doc.id,
-            title: doc.data().title,
+            categories: doc.data().categories,
+            order: doc.data().order,
+            level: doc.data().level,
+            importance: doc.data().importance,
             type: doc.data().type,
             partOfDay: doc.data().partOfDay
           })
         )
+
+        console.log(tasks)
 
 
         let tasksByType = tasks.reduce((prev, curr) => {
@@ -125,11 +134,72 @@ function App() {
   useEffect(() => {
     getAuth()
     subscribeFirebase()
+    const storedMarked = JSON.parse(localStorage.getItem('marked'))
+    if (storedMarked) setMarked(storedMarked)
   }, []);
 
+  useEffect(
+    () => {
+      localStorage.setItem('marked', JSON.stringify(marked))
+    }, [marked]
+  )
+
+  const isAnewDay = () => {
+    return activities.length === 0
+  }
+
+  useEffect(
+    () => {
+      if (isAnewDay()) {
+        setMarked([])
+      }
+
+    }, [activities]
+  )
 
 
-  const updateFirebase = e => {
+
+  const runMe = e => {
+
+    // TODO this is how you remove the property
+    // db.collection("activities").get().then(function (querySnapshot) {
+    //   querySnapshot.forEach(function (doc) {
+    //     doc.ref.update({
+    //       active: firebase.firestore.FieldValue.delete()
+    //     });
+    //   });
+    // });
+
+    // TODO this is how you add the property
+    // db.collection("tasks").get().then(function (querySnapshot) {
+    //   querySnapshot.forEach(function (doc) {
+    //     doc.ref.update({
+    //       active: true
+    //     });
+    //   });
+    // });
+
+
+    return
+
+    // activityRef.forEach((task, id) => {
+
+
+
+    //   db.collection("tasks").doc(task.name).update({
+    //     partOfDay: task.d,
+    //     order: (id + 1)
+    //   })
+    //     .then(function () {
+    //       console.log("Document successfully written!");
+    //     })
+    //     .catch(function (error) {
+    //       console.error("Error writing document: ", error);
+    //     });
+
+    // })
+
+
 
     const dailies = [
       'Tibetans',
@@ -307,12 +377,38 @@ function App() {
   }
 
 
-  const getTaskList = tasks => tasks.map(({ id, type, newSection }) => {
+  const getTaskList = tasks => tasks.map((task) => {
+    const { id, type, newSection } = task
+
+    const markTask = ({ id }) => {
+      if (marked.includes(id)) {
+        const newMarked = marked.filter(m => m != id)
+        setMarked(newMarked)
+        return
+      }
+
+      setMarked([...marked, id])
+    }
+
+    const getColorByCountDone = ({ id }) => {
+      const count = activities.filter(({ task }) => task == id).length
+      console.log(activities)
+
+      if (count === 1) return { backgroundColor: doneColors[0] }
+      if (count === 2) return { backgroundColor: doneColors[1] }
+      if (count === 3) return { backgroundColor: doneColors[2], color: 'white' }
+      if (count > 3) return { backgroundColor: doneColors[3], color: 'white' }
+
+      return { backgroundColor: notDoneColor }
+    }
+
+
     return (
-      <li key={id} className="task" style={{ marginTop: newSection ? "30px" : "0"}}>
-        <button onClick={e => checkActivity(id)}>SAVE</button>
-        <span className="task-title">
-          {id}
+      <li key={id} className="task" style={{ marginTop: newSection ? "30px" : "0" }}>
+        <button onClick={e => checkActivity(id)} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
+        <span className="task-title" onClick={e => markTask(task)}
+        >
+          {id} {marked.includes(id) && '🥦'}
         </span>
       </li>
     )
@@ -327,13 +423,10 @@ function App() {
     const dailiesToRender = dailiesFilteredSorted.map((daily, i) => {
       const nextDaily = dailiesFilteredSorted[i - 1] || 0
       if (nextDaily.partOfDay !== daily.partOfDay)
-        return {newSection: true, ...daily}
+        return { newSection: true, ...daily }
       return daily
-      
-    })
 
-    console.log(dailiesToRender)
-    
+    })
 
     return getTaskList(dailiesToRender)
   }
@@ -370,13 +463,15 @@ function App() {
   }
 
   const listActivities = activities.map(({ task, id, timestamp, datetime, grade }) =>
-    <li key={id}>
-      {task} - {datetime}
-      <button className="grade-btn" disabled={grade == 100} onClick={() => updateGrade(id, 100)}>just</button>
-      <button className="grade-btn" disabled={grade == 200} onClick={() => updateGrade(id, 200)}>ok</button>
-      <button className="grade-btn" disabled={grade == 300} onClick={() => updateGrade(id, 300)}>great</button>
-
-      <button className="grade-btn" onClick={() => checkActivity(task)}>REPEAT</button>
+    <li key={id} className="activity-item">
+      <div className="activity-text-section">{task} - {datetime}</div>
+      <div className="activity-btns-section">
+        <button className="grade-btn repeat-btn" onClick={() => checkActivity(task)}><BsArrowRepeat style={{ width: '20px', height: '20px' }}/></button>
+        
+        <button className="grade-btn" disabled={grade == 100} onClick={() => updateGrade(id, 100)}>just</button>
+        <button className="grade-btn" disabled={grade == 200} onClick={() => updateGrade(id, 200)}>ok</button>
+        <button className="grade-btn" disabled={grade == 300} onClick={() => updateGrade(id, 300)}>great</button>
+      </div>
 
     </li>
   );
@@ -439,7 +534,7 @@ function App() {
             <label htmlFor="task-name-input">Add new task</label>
             <input type="text" id="task-name-input" onKeyDown={handleKeyDown} onChange={e => setTitle(e.target.value)} value={title} />
             <button onClick={saveFirebase}>SAVE</button>
-            <button onClick={updateFirebase}>RUNME</button>
+            <button onClick={runMe}>RUNME</button>
             <p>{title}</p>
           </div>
         </div>

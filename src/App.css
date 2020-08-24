@@ -2,39 +2,8 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+*:focus {
+  outline: 0;
 }
 
 .wrapper {
@@ -81,10 +50,37 @@
   margin: 5px;
 }
 
+.repeat-btn {
+  background: none;
+  border: none;
+}
+
+.repeat-btn:focus {
+  border: none;
+}
+
+.repeat-btn:hover {
+  cursor: pointer;
+}
+
 .task {
   text-align: left;
   margin-bottom: 7px;
 }
+
+
+.activity-item {
+  display: flex;
+  width: 450px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.activity-btns-section {
+  align-items: center;
+}
+
+.
 
 
 /* TEST */
@@ -100,4 +96,16 @@
   position: fixed;
   right: 20px;
   top: 400px;
+}
+
+.btn-main {
+  width: 70px;
+  height: 25px;
+  border-radius: 5px;
+  border: 1px solid green;
+  margin-right: 5px;
+}
+
+.btn-main:hover {
+  cursor: pointer;
 }
