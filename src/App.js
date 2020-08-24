@@ -28,11 +28,12 @@ function App() {
   const [dailies, setDailies] = useState([]);
   const [habits, setHabits] = useState([]);
   const [chores, setChores] = useState([]);
+  const [timeSinceLastActivity, setTimeSinceLastActivity] = useState(0);
   const [activities, setActivities] = useState([]);
   const [auth, setAuth] = useState('ok');
 
-  const doneColors = ['#0080004f', ' #008000a3', ' #008000c9', ' #008000']
-  const notDoneColor = '#c3c7a71f'
+  const doneColors = ['#0080001f', ' #008000a3', ' #008000c9', ' #008000']
+  const notDoneColor = '#c5a7c736'
 
 
   const subscribeFirebase = () => {
@@ -147,12 +148,54 @@ function App() {
   const isAnewDay = () => {
     return activities.length === 0
   }
+  let hej = 0
+
+  useEffect(() => {
+
+    function updateTimeSinceLastActivity() {
+      setTimeSinceLastActivity(time => {
+
+        let miliseconds = (Date.now() - activities[0]?.timestamp)
+        let diff = Math.floor(miliseconds / 1000)
+
+        return diff
+      })
+    }
+
+    const interval = setInterval(() => {
+      updateTimeSinceLastActivity()
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [activities]);
 
   useEffect(
     () => {
-      if (isAnewDay()) {
-        setMarked([])
-      }
+
+      // setInterval(() => {
+      //   // setTimeSinceLastActivity(time => {
+
+      //   //   let miliseconds = (Date.now() - activities[0]?.timestamp)
+      //   //   let diff = miliseconds / 1000
+      //   //   console.log('DIFFFF', diff)
+
+
+
+      //   //   let hours = Math.floor(diff / 3600);
+      //   //   let totalSeconds = diff % 3600;
+      //   //   let minutes = Math.floor(totalSeconds / 60);
+      //   //   let seconds = totalSeconds % 60;
+
+      //   //   // console.log("hours: " + hours);
+      //   //   // console.log("minutes: " + minutes);
+      //   //   // console.log("seconds: " + seconds);
+
+
+
+      //   //   return `${hours}:${minutes}:${Math.floor(seconds)}`
+      //   // })
+
+      // }, 1000);
+
 
     }, [activities]
   )
@@ -179,6 +222,7 @@ function App() {
     //   });
     // });
 
+    getTimeSinceLastActivity()
 
     return
 
@@ -392,14 +436,13 @@ function App() {
 
     const getColorByCountDone = ({ id }) => {
       const count = activities.filter(({ task }) => task == id).length
-      console.log(activities)
 
       if (count === 1) return { backgroundColor: doneColors[0] }
       if (count === 2) return { backgroundColor: doneColors[1] }
       if (count === 3) return { backgroundColor: doneColors[2], color: 'white' }
       if (count > 3) return { backgroundColor: doneColors[3], color: 'white' }
 
-      return { backgroundColor: notDoneColor }
+      return { backgroundColor: notDoneColor, border: '1px solid blue' }
     }
 
 
@@ -431,16 +474,18 @@ function App() {
     return getTaskList(dailiesToRender)
   }
 
+
+
   const listTasks = () => {
     return (
       <div className="all-tasks">
-        <h3>Dailies</h3>
+        <h3 className="main-sections-header">Dailies</h3>
         <ol className="dailies">
           {getTaskList(dailies)}
           {/* {getDailies()} */}
         </ol>
 
-        <h3>Habits</h3>
+        <h3 className="main-sections-header">Habits</h3>
         <ol className="habits">
           {getTaskList(habits)}
         </ol>
@@ -464,10 +509,13 @@ function App() {
 
   const listActivities = activities.map(({ task, id, timestamp, datetime, grade }) =>
     <li key={id} className="activity-item">
-      <div className="activity-text-section">{task} - {datetime}</div>
+
+      <div className="activity-text-section">
+        <button className="grade-btn repeat-btn" onClick={() => checkActivity(task)}><BsArrowRepeat style={{ width: '20px', height: '20px' }} /></button>
+        {task} - {datetime}
+      </div>
       <div className="activity-btns-section">
-        <button className="grade-btn repeat-btn" onClick={() => checkActivity(task)}><BsArrowRepeat style={{ width: '20px', height: '20px' }}/></button>
-        
+
         <button className="grade-btn" disabled={grade == 100} onClick={() => updateGrade(id, 100)}>just</button>
         <button className="grade-btn" disabled={grade == 200} onClick={() => updateGrade(id, 200)}>ok</button>
         <button className="grade-btn" disabled={grade == 300} onClick={() => updateGrade(id, 300)}>great</button>
@@ -483,6 +531,10 @@ function App() {
     setTitle('')
   }
 
+  const onReset = () => {
+    setMarked([])
+
+  }
 
   const onKeyPressed = (event) => {
     try {
@@ -498,9 +550,33 @@ function App() {
     }
   }
 
+  const getTimeSinceLastActivity = () => Date.now() - activities[0]?.timestamp
+
+  const pomodoroCount = (time) => {
+    const pomCount = Math.floor(timeSinceLastActivity / 60 /25)
+
+    return pomCount < 5 ? pomCount : 0
+  }
+
+  const timeSinceLastActivityFormatted = () => {
+    const diff = timeSinceLastActivity
+    let hours = Math.floor(diff / 3600);
+    let totalSeconds = diff % 3600;
+    let minutes = Math.floor(totalSeconds / 60);
+    let seconds = totalSeconds % 60;
+
+    const addNullIfNeeded = (timePart) => {
+      return timePart < 10 ? '0' + timePart : timePart
+    }
+
+    return `${addNullIfNeeded(hours)}:${addNullIfNeeded(minutes)}:${addNullIfNeeded(Math.floor(seconds))}`
+  }
+
+  const pom = 'POM-'
   return (
     auth === 'yep' && <div className="App">
       <div className="super-wrapper" onKeyDown={onKeyPressed} tabIndex="0">
+        <button className="reset-btn" onClick={e => onReset()}>Reset</button>
         <div className="wrapper">
           {/* 
         <div 
@@ -517,17 +593,23 @@ function App() {
             </div>
           </div>
           <div className="dailies-list">
-            <h3>Dailies Left</h3>
+            <h3 className="main-sections-header">Dailies Left</h3>
             <ol className="dailies">
               {getDailies()}
             </ol>
-            <h3>Chores</h3>
+            <h3 className="main-sections-header">Chores</h3>
             <ol className="chores">
               {getTaskList(chores)}
             </ol>
           </div>
           <div className="task-log">
-            <h3>Recent activity</h3>
+            <h3 className="main-sections-header recent-activity-header">Recent activity</h3>
+            <div className="time-since-wrapper">
+              <div className="time-since-label">
+                Time since the last activity:
+              </div>
+              <div className="time-since"><span>{timeSinceLastActivityFormatted()}</span><span> {'🍅'.repeat(pomodoroCount())}</span></div>
+            </div>
             <ol className="loglist">{listActivities}</ol>
           </div>
           <div className="new-task">

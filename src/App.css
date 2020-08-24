@@ -1,15 +1,18 @@
 .App {
-  text-align: center;
 }
 
 *:focus {
   outline: 0;
 }
 
+.main-sections-header {
+  margin-top: 0;
+  text-align: center;
+}
+
 .wrapper {
   display: flex;
   flex-wrap: wrap;
-  margin-top: 30px;
   height: 80px;
 }
 
@@ -71,7 +74,8 @@
 
 .activity-item {
   display: flex;
-  width: 450px;
+  max-width: 500px;
+  min-width: 430px;
   justify-content: space-between;
   align-items: center;
 }
@@ -80,7 +84,27 @@
   align-items: center;
 }
 
-.
+.time-since-wrapper {
+  display: flex;
+  width: 480px;
+  display: flex;
+  justify-content: flex-end
+}
+
+.time-since {
+  font-size: 16pt;
+  background-color: #dad53059;
+  color: #321944;
+  height: 26px;
+  min-width: 192px;
+  text-align: center;
+  border-radius: 6px;
+  margin-left: 15px;
+}
+
+
+
+
 
 
 /* TEST */
@@ -109,3 +133,5 @@
 .btn-main:hover {
   cursor: pointer;
 }
+
+
