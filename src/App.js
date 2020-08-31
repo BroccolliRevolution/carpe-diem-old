@@ -507,7 +507,28 @@ function App() {
       });
   }
 
-  const listActivities = activities.map(({ task, id, timestamp, datetime, grade }) =>
+  const timeSincePreviousActivityByIndex = (timestamp, i) => {
+    if (i > activities.length - 2) return ''
+
+    let res = ''
+    if (i === 0) res = Date.now() - timestamp
+    
+    res =  timestamp - activities[i + 1]?.timestamp
+    const diff = res / 1000
+
+    let hours = Math.floor(diff / 3600);
+    let totalSeconds = diff % 3600;
+    let minutes = Math.floor(totalSeconds / 60);
+    let seconds = totalSeconds % 60;
+
+    const addNullIfNeeded = (timePart) => {
+      return timePart < 10 ? '0' + timePart : timePart
+    }
+
+    return `${addNullIfNeeded(hours)}:${addNullIfNeeded(minutes)}:${addNullIfNeeded(Math.floor(seconds))}`
+  }
+
+  const listActivities = activities.map(({ task, id, timestamp, datetime, grade }, i) =>
     <li key={id} className="activity-item">
 
       <div className="activity-text-section">
@@ -519,6 +540,7 @@ function App() {
         <button className="grade-btn" disabled={grade == 100} onClick={() => updateGrade(id, 100)}>just</button>
         <button className="grade-btn" disabled={grade == 200} onClick={() => updateGrade(id, 200)}>ok</button>
         <button className="grade-btn" disabled={grade == 300} onClick={() => updateGrade(id, 300)}>great</button>
+        {timeSincePreviousActivityByIndex(timestamp, i)}
       </div>
 
     </li>
@@ -558,8 +580,7 @@ function App() {
     return pomCount < 5 ? pomCount : 0
   }
 
-  const timeSinceLastActivityFormatted = () => {
-    const diff = timeSinceLastActivity
+  const timeSinceLastActivityFormatted = (diff) => {
     let hours = Math.floor(diff / 3600);
     let totalSeconds = diff % 3600;
     let minutes = Math.floor(totalSeconds / 60);
@@ -603,12 +624,11 @@ function App() {
             </ol>
           </div>
           <div className="task-log">
-            <h3 className="main-sections-header recent-activity-header">Recent activity</h3>
             <div className="time-since-wrapper">
               <div className="time-since-label">
-                Time since the last activity:
+                Time since the last activity/Last time:
               </div>
-              <div className="time-since"><span>{timeSinceLastActivityFormatted()}</span><span> {'🍅'.repeat(pomodoroCount())}</span></div>
+              <div className="time-since"><span>{timeSinceLastActivityFormatted(timeSinceLastActivity)}</span><span> {'🍅'.repeat(pomodoroCount())}</span></div>
             </div>
             <ol className="loglist">{listActivities}</ol>
           </div>

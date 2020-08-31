@@ -74,8 +74,8 @@
 
 .activity-item {
   display: flex;
-  max-width: 500px;
-  min-width: 430px;
+  max-width: 600px;
+  min-width: 520px;
   justify-content: space-between;
   align-items: center;
 }
