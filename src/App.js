@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
 import './App.css';
 import firebase from 'firebase'
 import firebaseConfig from './config/firebase-config'
@@ -512,8 +518,8 @@ function App() {
 
     let res = ''
     if (i === 0) res = Date.now() - timestamp
-    
-    res =  timestamp - activities[i + 1]?.timestamp
+
+    res = timestamp - activities[i + 1]?.timestamp
     const diff = res / 1000
 
     let hours = Math.floor(diff / 3600);
@@ -575,7 +581,7 @@ function App() {
   const getTimeSinceLastActivity = () => Date.now() - activities[0]?.timestamp
 
   const pomodoroCount = (time) => {
-    const pomCount = Math.floor(timeSinceLastActivity / 60 /25)
+    const pomCount = Math.floor(timeSinceLastActivity / 60 / 25)
 
     return pomCount < 5 ? pomCount : 0
   }
@@ -594,18 +600,45 @@ function App() {
   }
 
   const pom = 'POM-'
-  return (
-    auth === 'yep' && <div className="App">
+
+
+  function EditTask() {
+    
+  }
+
+  function TasksEdit() {
+
+    const tasks = [...dailies, ...habits, ...chores]
+
+    const tasksList = tasks.map(task => {
+
+      return (<li>{task.id}</li>)
+    })
+
+    return (
+      <div className="task-list-wrapper">
+        <ul>
+          {tasksList}
+
+        </ul>
+      </div>
+    )
+  }
+
+
+
+  function Home() {
+    return (
       <div className="super-wrapper" onKeyDown={onKeyPressed} tabIndex="0">
         <button className="reset-btn" onClick={e => onReset()}>Reset</button>
         <div className="wrapper">
           {/* 
-        <div 
-      className="player"
-      style={{ position: "absolute", width: '200px', height: '100px', background: 'yellow' }}
-      onKeyDown={onKeyPressed}
-      tabIndex="0"
-    ></div> */}
+      <div 
+    className="player"
+    style={{ position: "absolute", width: '200px', height: '100px', background: 'yellow' }}
+    onKeyDown={onKeyPressed}
+    tabIndex="0"
+  ></div> */}
 
 
           <div className="tasks-wrapper">
@@ -627,7 +660,7 @@ function App() {
             <div className="time-since-wrapper">
               <div className="time-since-label">
                 Time since the last activity/Last time:
-              </div>
+            </div>
               <div className="time-since"><span>{timeSinceLastActivityFormatted(timeSinceLastActivity)}</span><span> {'🍅'.repeat(pomodoroCount())}</span></div>
             </div>
             <ol className="loglist">{listActivities}</ol>
@@ -641,6 +674,47 @@ function App() {
           </div>
         </div>
       </div>
+    )
+  }
+
+
+
+
+
+  return (
+    auth === 'yep' &&
+    <div className="App">
+
+      <Router>
+        <div>
+
+
+          {/* A <Switch> looks through its children <Route>s and
+            renders the first one that matches the current URL. */}
+          <Switch>
+            <Route path="/tasks-edit">
+              <TasksEdit />
+            </Route>
+            <Route path="/">
+              <Home />
+            </Route>
+          </Switch>
+
+
+          <nav>
+            <ul>
+              <li>
+                <Link to="/">Home</Link>
+              </li>
+              <li>
+                <Link to="/tasks-edit">Task Edit</Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </Router>
+  
+
 
     </div>
   );
