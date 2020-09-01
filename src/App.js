@@ -28,7 +28,7 @@ var provider = new firebase.auth.GoogleAuthProvider();
 
 
 function App() {
-  const [title, setTitle] = useState('');
+
   const [entries, setEntries] = useState([]);   // TODO get rid of entries - no more used
   const [marked, setMarked] = useState([]);
   const [dailies, setDailies] = useState([]);
@@ -154,58 +154,6 @@ function App() {
   const isAnewDay = () => {
     return activities.length === 0
   }
-  let hej = 0
-
-  useEffect(() => {
-
-    function updateTimeSinceLastActivity() {
-      setTimeSinceLastActivity(time => {
-
-        let miliseconds = (Date.now() - activities[0]?.timestamp)
-        let diff = Math.floor(miliseconds / 1000)
-
-        return diff
-      })
-    }
-
-    const interval = setInterval(() => {
-      updateTimeSinceLastActivity()
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [activities]);
-
-  useEffect(
-    () => {
-
-      // setInterval(() => {
-      //   // setTimeSinceLastActivity(time => {
-
-      //   //   let miliseconds = (Date.now() - activities[0]?.timestamp)
-      //   //   let diff = miliseconds / 1000
-      //   //   console.log('DIFFFF', diff)
-
-
-
-      //   //   let hours = Math.floor(diff / 3600);
-      //   //   let totalSeconds = diff % 3600;
-      //   //   let minutes = Math.floor(totalSeconds / 60);
-      //   //   let seconds = totalSeconds % 60;
-
-      //   //   // console.log("hours: " + hours);
-      //   //   // console.log("minutes: " + minutes);
-      //   //   // console.log("seconds: " + seconds);
-
-
-
-      //   //   return `${hours}:${minutes}:${Math.floor(seconds)}`
-      //   // })
-
-      // }, 1000);
-
-
-    }, [activities]
-  )
-
 
 
   const runMe = e => {
@@ -388,23 +336,7 @@ function App() {
 
   }
 
-  const saveFirebase = (e) => {
 
-
-    if (title == '') return
-
-    const item = {
-      id: Date.now(),
-      title
-    }
-    db.collection("tasks").add(item)
-      .then(function (docRef) {
-        console.log("Document written with ID: ", docRef.id)
-      })
-      .catch(function (error) {
-        console.error("Error adding document: ", error)
-      });
-  }
 
   const checkActivity = (task) => {
     const newActivity = {
@@ -553,11 +485,7 @@ function App() {
   );
 
 
-  const handleKeyDown = (event) => {
-    if (event.key !== 'Enter') return
-    saveFirebase()
-    setTitle('')
-  }
+
 
   const onReset = () => {
     setMarked([])
@@ -599,48 +527,87 @@ function App() {
     return `${addNullIfNeeded(hours)}:${addNullIfNeeded(minutes)}:${addNullIfNeeded(Math.floor(seconds))}`
   }
 
-  const pom = 'POM-'
-
-
-  function EditTask() {
-    
-  }
-
   function TasksEdit() {
-
+    const [title, setTitle] = useState('');
+    const [type, setType] = useState('');
+    
     const tasks = [...dailies, ...habits, ...chores]
+    const saveTask = (e) => {
+      if (title == '') return
+      db.collection("tasks").doc(title).set({
+        active: true,
+        categories: [],
+        importance: 100,
+        isDaily: true,
+        level: 1,
+        order: 20,
+        type
+      })
+    }
 
-    const tasksList = tasks.map(task => {
+    const tasksList = tasks.map((task, id) => (<li key={id}>{task.id} - {task.type}</li>))
 
-      return (<li>{task.id}</li>)
-    })
+    const handleKeyDown = (event) => {
+      if (event.key !== 'Enter') return
+      saveTask()
+      setTitle('')
+    }
 
     return (
       <div className="task-list-wrapper">
+
+        <div className="new-task">
+          <label htmlFor="task-name-input">Add new task</label>
+          <input type="text" id="task-name-input" onKeyDown={handleKeyDown} onChange={e => setTitle(e.target.value)} value={title} />
+
+          <select id="lang" onChange={e => setType(e.target.value)} value={type}>
+            <option value="dailies">dailies</option>
+            <option value="habits">habits</option>
+            <option value="chores">chores</option>
+            <option value="hobbies">hobbies</option>
+          </select>
+               
+        
+          <button onClick={saveTask}>SAVE</button>
+          <button onClick={runMe}>RUNME</button>
+          <p>{title} - {type}</p>
+        </div>
+
         <ul>
           {tasksList}
-
         </ul>
+
       </div>
     )
   }
 
 
 
-  function Home() {
+  function Home({ acts }) {
+
+    useEffect(() => {
+
+      function updateTimeSinceLastActivity() {
+        setTimeSinceLastActivity(time => {
+
+          let miliseconds = (Date.now() - activities[0]?.timestamp)
+          let diff = Math.floor(miliseconds / 1000)
+
+          return diff
+        })
+      }
+
+      const interval = setInterval(() => {
+        updateTimeSinceLastActivity()
+      }, 1000);
+      return () => clearInterval(interval);
+    }, [acts]);
+
+
     return (
       <div className="super-wrapper" onKeyDown={onKeyPressed} tabIndex="0">
         <button className="reset-btn" onClick={e => onReset()}>Reset</button>
         <div className="wrapper">
-          {/* 
-      <div 
-    className="player"
-    style={{ position: "absolute", width: '200px', height: '100px', background: 'yellow' }}
-    onKeyDown={onKeyPressed}
-    tabIndex="0"
-  ></div> */}
-
-
           <div className="tasks-wrapper">
             <div className="tasklist">
               {listTasks()}
@@ -664,13 +631,6 @@ function App() {
               <div className="time-since"><span>{timeSinceLastActivityFormatted(timeSinceLastActivity)}</span><span> {'🍅'.repeat(pomodoroCount())}</span></div>
             </div>
             <ol className="loglist">{listActivities}</ol>
-          </div>
-          <div className="new-task">
-            <label htmlFor="task-name-input">Add new task</label>
-            <input type="text" id="task-name-input" onKeyDown={handleKeyDown} onChange={e => setTitle(e.target.value)} value={title} />
-            <button onClick={saveFirebase}>SAVE</button>
-            <button onClick={runMe}>RUNME</button>
-            <p>{title}</p>
           </div>
         </div>
       </div>
@@ -696,7 +656,7 @@ function App() {
               <TasksEdit />
             </Route>
             <Route path="/">
-              <Home />
+              <Home acts={activities} />
             </Route>
           </Switch>
 
@@ -713,7 +673,7 @@ function App() {
           </nav>
         </div>
       </Router>
-  
+
 
 
     </div>
