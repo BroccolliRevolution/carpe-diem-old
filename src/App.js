@@ -9,6 +9,7 @@ import './App.css';
 import firebase from 'firebase'
 import firebaseConfig from './config/firebase-config'
 import { BsArrowRepeat } from 'react-icons/bs';
+import { FaCheckCircle } from 'react-icons/fa';
 
 firebase.initializeApp(firebaseConfig)
 var db = firebase.firestore();
@@ -345,9 +346,6 @@ function App() {
       date: new Date(Date.now()),
       task
     }
-
-    console.log(newActivity)
-
     db.collection("activities").add(newActivity)
       .then(function (docRef) {
         console.log("Document written with ID: ", docRef.id)
@@ -372,6 +370,8 @@ function App() {
       setMarked([...marked, id])
     }
 
+    const showCheckedIcon = ({ id }) => activities.filter(({ task }) => task == id).length > 0
+
     const getColorByCountDone = ({ id }) => {
       const count = activities.filter(({ task }) => task == id).length
 
@@ -386,9 +386,9 @@ function App() {
 
     return (
       <li key={id} className="task" style={{ marginTop: newSection ? "30px" : "0" }}>
+        <FaCheckCircle style={{ margin: "0 5px 0 5px", color: 'green', opacity: (showCheckedIcon(task) ? '1' : '0') }}/>
         <button onClick={e => checkActivity(id)} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
-        <span className="task-title" onClick={e => markTask(task)}
-        >
+        <span className="task-title" onClick={e => markTask(task)}>
           {id} {marked.includes(id) && '🥦'}
         </span>
       </li>
