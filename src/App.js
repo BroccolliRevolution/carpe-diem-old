@@ -532,8 +532,11 @@ function App() {
     const [type, setType] = useState('');
     
     const tasks = [...dailies, ...habits, ...chores]
-    const saveTask = (e) => {
-      if (title == '') return
+    const saveTask = (e) => {      
+      if (title == '' || type == '') {
+        alert('set task and type')
+        return
+      }
       db.collection("tasks").doc(title).set({
         active: true,
         categories: [],
@@ -561,6 +564,7 @@ function App() {
           <input type="text" id="task-name-input" onKeyDown={handleKeyDown} onChange={e => setTitle(e.target.value)} value={title} />
 
           <select id="lang" onChange={e => setType(e.target.value)} value={type}>
+            <option value="">TYPE</option>
             <option value="dailies">dailies</option>
             <option value="habits">habits</option>
             <option value="chores">chores</option>
