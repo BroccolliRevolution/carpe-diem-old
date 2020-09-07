@@ -9,24 +9,11 @@ import './App.css';
 import firebase from 'firebase'
 import firebaseConfig from './config/firebase-config'
 import { BsArrowRepeat } from 'react-icons/bs';
-import { FaCheckCircle } from 'react-icons/fa';
+import TimeSince from './TimeSince'
+import RunHelpChore from './RunHelpChore';
 
 firebase.initializeApp(firebaseConfig)
 var db = firebase.firestore();
-
-/*
-var provider = new firebase.auth.GoogleAuthProvider();
- provider.addScope('profile');
- provider.addScope('email');
- provider.addScope('https://www.googleapis.com/auth/plus.me');
- firebase.auth().signInWithPopup(provider); // Opens a popup window and returns a promise to handle errors.
-
- firebase.auth().onAuthStateChanged(function(user) {
-  window.user = user; //  is undefined if no user signed in
- });
-
- */
-
 
 function App() {
 
@@ -35,12 +22,12 @@ function App() {
   const [dailies, setDailies] = useState([]);
   const [habits, setHabits] = useState([]);
   const [chores, setChores] = useState([]);
-  const [timeSinceLastActivity, setTimeSinceLastActivity] = useState(0);
   const [activities, setActivities] = useState([]);
   const [auth, setAuth] = useState('ok');
 
   const doneColors = ['#0080001f', ' #008000a3', ' #008000c9', ' #008000']
   const notDoneColor = '#c5a7c736'
+
 
 
   const subscribeFirebase = () => {
@@ -149,193 +136,8 @@ function App() {
   useEffect(
     () => {
       localStorage.setItem('marked', JSON.stringify(marked))
-    }, [marked]
+    }, [activities]
   )
-
-  const isAnewDay = () => {
-    return activities.length === 0
-  }
-
-
-  const runMe = e => {
-
-    // TODO this is how you remove the property
-    // db.collection("activities").get().then(function (querySnapshot) {
-    //   querySnapshot.forEach(function (doc) {
-    //     doc.ref.update({
-    //       active: firebase.firestore.FieldValue.delete()
-    //     });
-    //   });
-    // });
-
-    // TODO this is how you add the property
-    // db.collection("tasks").get().then(function (querySnapshot) {
-    //   querySnapshot.forEach(function (doc) {
-    //     doc.ref.update({
-    //       active: true
-    //     });
-    //   });
-    // });
-
-    getTimeSinceLastActivity()
-
-    return
-
-    // activityRef.forEach((task, id) => {
-
-
-
-    //   db.collection("tasks").doc(task.name).update({
-    //     partOfDay: task.d,
-    //     order: (id + 1)
-    //   })
-    //     .then(function () {
-    //       console.log("Document successfully written!");
-    //     })
-    //     .catch(function (error) {
-    //       console.error("Error writing document: ", error);
-    //     });
-
-    // })
-
-
-
-    const dailies = [
-      'Tibetans',
-      'Journal',
-      'Exercise',
-      'Tech Podcast',
-      'Yoga',
-      'Meditation',
-      'Book',
-      'Medium',
-      'Duolingo',
-      'Elevate',
-      'Audiobook',
-      'Cardio',
-      'MOOC',
-      'Tech Course',
-      'Podcast',
-      'Stretches',
-    ]
-
-
-    // or maybe auxiliary? or hobbies?
-    const habits = [
-      'Project',
-      'Computerphile',
-      'Art',
-      'CuriosityStream',
-      'Science Festival',
-      'Firebase Tutorial',
-      'Cheery Friday',
-      'Leisure',
-      'Other Education',
-      'FOOD',
-      'NAP',
-    ]
-
-    const chores = [
-      'Chores',
-      'TODOs',
-      'Bookmarks, Articles',
-      'Cleanup Tabs, Papers',
-      'Review',
-      'Books Notes',
-      'Idea Map',
-      'Musings',
-    ]
-
-
-    const dailiesToUpdate = [
-      { name: 'Tibetans', d: 'morning' },
-      { name: 'Journal', d: 'morning' },
-      { name: 'Tech Podcast', d: 'morning' },
-      { name: 'Cardio', d: 'morning' },
-      { name: 'Audiobook', d: 'morning' },
-      { name: 'Book', d: 'morning' },
-      { name: 'Exercise', d: 'morning' },
-      { name: 'Yoga', d: '' },
-      { name: 'Meditation', d: 'morning' },
-      { name: 'MOOC', d: 'afternoon' },
-      { name: 'Tech Course', d: 'afternoon' },
-      { name: 'Podcast', d: 'afternoon' },
-      { name: 'Stretches', d: 'evening' },
-      { name: 'Medium', d: 'evening' },
-      { name: 'Duolingo', d: 'evening' },
-      { name: 'Elevate', d: 'evening' },
-    ]
-
-
-
-    const tasksToUpdate = [
-      'Tibetans',
-      'Journal',
-      'Exercise',
-      'Yoga',
-      'Cardio',
-      'Book',
-      'Medium',
-      'Duolingo',
-      'Elevate',
-      'Tech Podcast',
-      'Audiobook',
-      'MOOC',
-      'Tech Course',
-      'Stretches',
-      'Meditation',
-      'Podcast',
-
-      // 'Project',
-      // 'Computerphile',
-      // 'Art',
-      // 'CuriosityStream',
-      // 'Science Festival',
-      // 'Firebase Tutorial',
-      // 'Cheery Friday',
-      // 'Leisure',
-      // 'Other Education',
-      // 'FOOD',
-      // 'NAP',
-
-      // 'Chores',
-      // 'Musings',
-      // 'TODOs',
-      // 'Bookmarks, Articles',
-      // 'Cleanup Tabs, Papers',
-      // 'Review',
-      // 'Books Notes',
-      // 'Idea Map',
-    ]
-
-    const getType = taskId => {
-      if (dailies.includes(taskId)) return 'dailies'
-      if (habits.includes(taskId)) return 'habits'
-      if (chores.includes(taskId)) return 'chores'
-    }
-
-    // UNCOMMENT THIS TO MAKE THIS WORK
-    return
-
-    dailiesToUpdate.forEach((task, id) => {
-
-
-
-      db.collection("tasks").doc(task.name).update({
-        partOfDay: task.d,
-        order: (id + 1)
-      })
-        .then(function () {
-          console.log("Document successfully written!");
-        })
-        .catch(function (error) {
-          console.error("Error writing document: ", error);
-        });
-
-    })
-
-
-  }
 
 
 
@@ -386,7 +188,6 @@ function App() {
 
     return (
       <li key={id} className="task" style={{ marginTop: newSection ? "30px" : "0" }}>
-        <FaCheckCircle style={{ margin: "0 5px 0 5px", color: 'green', opacity: (showCheckedIcon(task) ? '1' : '0') }}/>
         <button onClick={e => checkActivity(id)} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
         <span className="task-title" onClick={e => markTask(task)}>
           {id} {marked.includes(id) && '🥦'}
@@ -506,33 +307,14 @@ function App() {
     }
   }
 
-  const getTimeSinceLastActivity = () => Date.now() - activities[0]?.timestamp
-
-  const pomodoroCount = (time) => {
-    const pomCount = Math.floor(timeSinceLastActivity / 60 / 25)
-
-    return pomCount < 5 ? pomCount : 0
-  }
-
-  const timeSinceLastActivityFormatted = (diff) => {
-    let hours = Math.floor(diff / 3600);
-    let totalSeconds = diff % 3600;
-    let minutes = Math.floor(totalSeconds / 60);
-    let seconds = totalSeconds % 60;
-
-    const addNullIfNeeded = (timePart) => {
-      return timePart < 10 ? '0' + timePart : timePart
-    }
-
-    return `${addNullIfNeeded(hours)}:${addNullIfNeeded(minutes)}:${addNullIfNeeded(Math.floor(seconds))}`
-  }
+  
 
   function TasksEdit() {
     const [title, setTitle] = useState('');
     const [type, setType] = useState('');
-    
+
     const tasks = [...dailies, ...habits, ...chores]
-    const saveTask = (e) => {      
+    const saveTask = (e) => {
       if (title == '' || type == '') {
         alert('set task and type')
         return
@@ -570,10 +352,9 @@ function App() {
             <option value="chores">chores</option>
             <option value="hobbies">hobbies</option>
           </select>
-               
-        
+
           <button onClick={saveTask}>SAVE</button>
-          <button onClick={runMe}>RUNME</button>
+          {/* <RunHelpChore activities={activities}/> */}
           <p>{title} - {type}</p>
         </div>
 
@@ -586,28 +367,7 @@ function App() {
   }
 
 
-
-  function Home({ acts }) {
-
-    useEffect(() => {
-
-      function updateTimeSinceLastActivity() {
-        setTimeSinceLastActivity(time => {
-
-          let miliseconds = (Date.now() - activities[0]?.timestamp)
-          let diff = Math.floor(miliseconds / 1000)
-
-          return diff
-        })
-      }
-
-      const interval = setInterval(() => {
-        updateTimeSinceLastActivity()
-      }, 1000);
-      return () => clearInterval(interval);
-    }, [acts]);
-
-
+  function Home({ activities }) {
     return (
       <div className="super-wrapper" onKeyDown={onKeyPressed} tabIndex="0">
         <button className="reset-btn" onClick={e => onReset()}>Reset</button>
@@ -629,10 +389,7 @@ function App() {
           </div>
           <div className="task-log">
             <div className="time-since-wrapper">
-              <div className="time-since-label">
-                Time since the last activity/Last time:
-            </div>
-              <div className="time-since"><span>{timeSinceLastActivityFormatted(timeSinceLastActivity)}</span><span> {'🍅'.repeat(pomodoroCount())}</span></div>
+              <TimeSince activities={activities} />
             </div>
             <ol className="loglist">{listActivities}</ol>
           </div>
@@ -640,10 +397,6 @@ function App() {
       </div>
     )
   }
-
-
-
-
 
   return (
     auth === 'yep' &&
@@ -660,7 +413,7 @@ function App() {
               <TasksEdit />
             </Route>
             <Route path="/">
-              <Home acts={activities} />
+              <Home activities={activities} />
             </Route>
           </Switch>
 
