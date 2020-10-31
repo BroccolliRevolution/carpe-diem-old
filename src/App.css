@@ -107,6 +107,15 @@
   width: 30px;
 }
 
+.all-done-text {
+  margin-top: 50px;
+}
+
+.all-done {
+  font-size: 24px;
+  font-weight: normal;
+}
+
 
 
 /* TEST */

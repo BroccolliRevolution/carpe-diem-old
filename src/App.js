@@ -22,6 +22,7 @@ function App() {
   const [dailies, setDailies] = useState([]);
   const [habits, setHabits] = useState([]);
   const [chores, setChores] = useState([]);
+  const [hobbies, setHobbies] = useState([]);
   const [activities, setActivities] = useState([]);
   const [auth, setAuth] = useState('ok');
 
@@ -98,10 +99,14 @@ function App() {
           return prev
         }, {})
 
-        const { dailies, habits, chores } = tasksByType
+        console.log(tasksByType)
+        const { dailies, habits, chores, hobbies } = tasksByType
+
+
         setDailies(items => [...dailies])
         setHabits(items => [...habits])
         setChores(items => [...chores])
+        setHobbies(items => [...hobbies])
 
 
       })
@@ -158,8 +163,20 @@ function App() {
 
   }
 
+  const changeOrder = ({ id, order }, by) => {
+    db.collection("tasks").doc(id)
+      .update({ order: order - by })
+      .then(function () {
+        console.log("Document successfully updated!");
+      })
+      .catch(function (error) {
+        // The document probably doesn't exist.
+        console.error("Error updating document: ", error);
+      });
+  }
 
-  const getTaskList = tasks => tasks.map((task) => {
+
+  const getTaskList = (tasks, showEditOrder) => tasks.map((task) => {
     const { id, type, newSection } = task
 
     const markTask = ({ id }) => {
@@ -188,9 +205,11 @@ function App() {
 
     return (
       <li key={id} className="task" style={{ marginTop: newSection ? "30px" : "0" }}>
+        {showEditOrder && <button onClick={e => changeOrder(task, +1)}>🔼</button>}
+        {showEditOrder && <button onClick={e => changeOrder(task, -1)}>🔽</button>}
         <button onClick={e => checkActivity(id)} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
         <span className="task-title" onClick={e => markTask(task)}>
-          {id} {marked.includes(id) && '🥦'}
+          {id} {marked.includes(id) && '🥦'}{showEditOrder && (' - ' + task.order)}
         </span>
       </li>
     )
@@ -218,12 +237,6 @@ function App() {
   const listTasks = () => {
     return (
       <div className="all-tasks">
-        <h3 className="main-sections-header">Dailies</h3>
-        <ol className="dailies">
-          {getTaskList(dailies)}
-          {/* {getDailies()} */}
-        </ol>
-
         <h3 className="main-sections-header">Habits</h3>
         <ol className="habits">
           {getTaskList(habits)}
@@ -290,7 +303,6 @@ function App() {
 
   const onReset = () => {
     setMarked([])
-
   }
 
   const onKeyPressed = (event) => {
@@ -307,7 +319,7 @@ function App() {
     }
   }
 
-  
+
 
   function TasksEdit() {
     const [title, setTitle] = useState('');
@@ -353,6 +365,7 @@ function App() {
             <option value="hobbies">hobbies</option>
           </select>
 
+          <button onClick={saveTask}>UP</button>
           <button onClick={saveTask}>SAVE</button>
           {/* <RunHelpChore activities={activities}/> */}
           <p>{title} - {type}</p>
@@ -368,23 +381,49 @@ function App() {
 
 
   function Home({ activities }) {
+    const [dailiesType, setDailiesType] = useState('All');
+    const [showEditOrder, setShowEditOrder] = useState(false);
+
+    const getDailiesByType = () => dailiesType === 'All' ? getDailies() : getTaskList(dailies, showEditOrder)
+    const onShowEditOrder = () => setShowEditOrder(!showEditOrder)
+
+
     return (
       <div className="super-wrapper" onKeyDown={onKeyPressed} tabIndex="0">
         <button className="reset-btn" onClick={e => onReset()}>Reset</button>
+        <button className="reset-btn" onClick={e => onShowEditOrder()}>Show Order</button>
         <div className="wrapper">
           <div className="tasks-wrapper">
             <div className="tasklist">
-              {listTasks()}
+              <div className="all-tasks">
+                <h3 className="main-sections-header">Habits</h3>
+                <ol className="habits">
+                  {getTaskList(habits, showEditOrder)}
+                </ol>
+
+                <h3 className="main-sections-header">Hobbies</h3>
+                <ol className="habits">
+                  {getTaskList(hobbies, showEditOrder)}
+                </ol>
+              </div>
             </div>
           </div>
           <div className="dailies-list">
-            <h3 className="main-sections-header">Dailies Left</h3>
+
+            <h3 className="main-sections-header">
+              Dailies <button onClick={e => setDailiesType(() => dailiesType === 'Left' ? 'All' : 'Left')}>{dailiesType}</button>
+              {getDailiesByType().length === 0 && <div className="all-done">
+                <div className="all-done-text">ALL DONE for today!!!</div>
+                <span>✔️✔️✔️</span></div>}
+            </h3>
+
             <ol className="dailies">
-              {getDailies()}
+              {getDailiesByType()}
             </ol>
+
             <h3 className="main-sections-header">Chores</h3>
             <ol className="chores">
-              {getTaskList(chores)}
+              {getTaskList(chores, showEditOrder)}
             </ol>
           </div>
           <div className="task-log">
@@ -404,8 +443,6 @@ function App() {
 
       <Router>
         <div>
-
-
           {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
           <Switch>
@@ -416,7 +453,6 @@ function App() {
               <Home activities={activities} />
             </Route>
           </Switch>
-
 
           <nav>
             <ul>
