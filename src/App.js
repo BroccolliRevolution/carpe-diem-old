@@ -81,6 +81,7 @@ function App() {
         querySnapshot.forEach(doc =>
           tasks.push({
             id: doc.id,
+            title: doc.data().title,
             categories: doc.data().categories,
             order: doc.data().order,
             level: doc.data().level,
@@ -177,7 +178,7 @@ function App() {
 
 
   const getTaskList = (tasks, showEditOrder) => tasks.map((task) => {
-    const { id, type, newSection } = task
+    const { id, type, newSection, title } = task
 
     const markTask = ({ id }) => {
       if (marked.includes(id)) {
@@ -209,12 +210,11 @@ function App() {
         {showEditOrder && <button onClick={e => changeOrder(task, -1)}>🔽</button>}
         <button onClick={e => checkActivity(id)} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
         <span className="task-title" onClick={e => markTask(task)}>
-          {id} {marked.includes(id) && '🥦'}{showEditOrder && (' - ' + task.order)}
+          {title || id}  {marked.includes(id) && '🥦'}{showEditOrder && (' - ' + task.order)}
         </span>
       </li>
     )
-  }
-  )
+  })
 
   const getDailies = () => {
     const todaysActivities = activities.map(({ task }) => task)
@@ -298,28 +298,9 @@ function App() {
     </li>
   );
 
-
-
-
   const onReset = () => {
     setMarked([])
   }
-
-  const onKeyPressed = (event) => {
-    try {
-      const index = (+event.key) - 1
-
-      // TODO change entries to dailies or other
-      const activity = entries[index].title
-      console.log(activity, index)
-
-      //checkActivity(activity)
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-
 
   function TasksEdit() {
     const [title, setTitle] = useState('');
@@ -389,21 +370,22 @@ function App() {
 
 
     return (
-      <div className="super-wrapper" onKeyDown={onKeyPressed} tabIndex="0">
+      <div className="super-wrapper" tabIndex="0">
         <button className="reset-btn" onClick={e => onReset()}>Reset</button>
         <button className="reset-btn" onClick={e => onShowEditOrder()}>Show Order</button>
         <div className="wrapper">
           <div className="tasks-wrapper">
             <div className="tasklist">
               <div className="all-tasks">
+
+                <h3 className="main-sections-header">All Dailies</h3>
+                <ol className="habits">
+                  {getTaskList(dailies, showEditOrder)}
+                </ol>
+
                 <h3 className="main-sections-header">Habits</h3>
                 <ol className="habits">
                   {getTaskList(habits, showEditOrder)}
-                </ol>
-
-                <h3 className="main-sections-header">Hobbies</h3>
-                <ol className="habits">
-                  {getTaskList(hobbies, showEditOrder)}
                 </ol>
               </div>
             </div>
@@ -420,6 +402,13 @@ function App() {
             <ol className="dailies">
               {getDailiesByType()}
             </ol>
+
+
+            <h3 className="main-sections-header">Hobbies</h3>
+            <ol className="habits">
+              {getTaskList(hobbies, showEditOrder)}
+            </ol>
+
 
             <h3 className="main-sections-header">Chores</h3>
             <ol className="chores">
