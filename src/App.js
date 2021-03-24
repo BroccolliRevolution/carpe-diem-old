@@ -25,34 +25,33 @@ function App() {
   const [hobbies, setHobbies] = useState([]);
   const [activities, setActivities] = useState([]);
   const [auth, setAuth] = useState('ok');
+  const [dateOffset, setDateOffset] = useState(0);
 
   const doneColors = ['#0080001f', ' #008000a3', ' #008000c9', ' #008000']
   const notDoneColor = '#c5a7c736'
 
+  function myDateFormat(dateIn) {
+    var yyyy = dateIn.getFullYear()
+    var mm = dateIn.getMonth() + 1
+    var dd = dateIn.getDate()
+    var min = dateIn.getMinutes()
+    var hh = dateIn.getHours()
 
+    if (+mm < 10) mm = '0' + mm
+    if (+dd < 10) dd = '0' + dd
+    if (+hh < 10) hh = '0' + hh
+    if (+min < 10) min = '0' + min
+    return yyyy + '-' + mm + '-' + dd + ' => ' + hh + ':' + min
+  }
 
-  const subscribeFirebase = () => {
-    console.log('database SUBSCRIBED!')
+const subscribeActivities = (dateOffset) => {
+  var date = new Date(Date.now()); 
+  var prev_date = new Date();
+  date.setDate(prev_date.getDate() - dateOffset);
+  date.setHours(0)
+  date.setMinutes(0)
 
-    function myDateFormat(dateIn) {
-      var yyyy = dateIn.getFullYear()
-      var mm = dateIn.getMonth() + 1
-      var dd = dateIn.getDate()
-      var min = dateIn.getMinutes()
-      var hh = dateIn.getHours()
-
-      if (+mm < 10) mm = '0' + mm
-      if (+dd < 10) dd = '0' + dd
-      if (+hh < 10) hh = '0' + hh
-      if (+min < 10) min = '0' + min
-      return yyyy + '-' + mm + '-' + dd + ' => ' + hh + ':' + min
-    }
-
-    var date = new Date()
-    date.setHours(0)
-    date.setMinutes(0)
-
-    db.collection("activities").orderBy("date", 'desc').where("date", ">", date)
+  db.collection("activities").orderBy("date", 'desc').where("date", ">", date)
       .onSnapshot(function (querySnapshot) {
         var activities = []
         querySnapshot.forEach(doc => {
@@ -72,6 +71,12 @@ function App() {
         setActivities(items => [...activities])
 
       })
+}
+
+  const subscribeFirebase = () => {
+    console.log('database SUBSCRIBED!')
+
+    subscribeActivities(dateOffset)    
 
     db.collection("tasks").orderBy("order").where("active", "==", true)
       .onSnapshot(function (querySnapshot) {
@@ -420,6 +425,12 @@ function App() {
               <TimeSince activities={activities} />
             </div>
             <ol className="loglist">{listActivities}</ol>
+            <button className="grade-btn" onClick={() => {
+              let newDate = dateOffset + 1
+              setDateOffset(prev => newDate)
+              subscribeActivities(newDate)
+            }}>more</button>
+
           </div>
         </div>
       </div>
