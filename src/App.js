@@ -425,7 +425,7 @@ const subscribeActivities = (dateOffset) => {
               <TimeSince activities={activities} />
             </div>
             <ol className="loglist">{listActivities}</ol>
-            <button className="" style={{'padding-left': '50px', 'padding-right': '50px', 'margin-left': '50px'}} onClick={() => {
+            <button className="" style={{'paddingLeft': '50px', 'paddingRight': '50px', 'marginLeft': '50px'}} onClick={() => {
               let newDate = dateOffset + 1
               setDateOffset(prev => newDate)
               subscribeActivities(newDate)
