@@ -23,6 +23,7 @@ function App() {
   const [habits, setHabits] = useState([]);
   const [chores, setChores] = useState([]);
   const [hobbies, setHobbies] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [activities, setActivities] = useState([]);
   const [auth, setAuth] = useState('ok');
   const [dateOffset, setDateOffset] = useState(0);
@@ -60,11 +61,13 @@ const subscribeActivities = (dateOffset) => {
           const datetimeStr = myDateFormat(datetime)
           activities.push({
             id: doc.id,
-            grade: doc.data().grade,
             task: doc.data().task,
             timestamp: doc.data().timestamp,
             partOfDay: doc.data().partOfDay,
-            datetime: datetimeStr
+            greade: doc.data().grade,
+            reward: doc.data().reward,
+            datetime: datetimeStr,
+            project: doc.data().project,
           })
 
         })
@@ -73,12 +76,8 @@ const subscribeActivities = (dateOffset) => {
       })
 }
 
-  const subscribeFirebase = () => {
-    console.log('database SUBSCRIBED!')
-
-    subscribeActivities(dateOffset)    
-
-    db.collection("tasks").orderBy("order").where("active", "==", true)
+const subscribeTasks = () => {
+  db.collection("tasks").orderBy("order").where("active", "==", true)
       .onSnapshot(function (querySnapshot) {
         var tasks = []
 
@@ -92,7 +91,8 @@ const subscribeActivities = (dateOffset) => {
             level: doc.data().level,
             importance: doc.data().importance,
             type: doc.data().type,
-            partOfDay: doc.data().partOfDay
+            partOfDay: doc.data().partOfDay,
+            project: doc.data().project,
           })
         )
 
@@ -113,9 +113,18 @@ const subscribeActivities = (dateOffset) => {
         setHabits(items => [...habits])
         setChores(items => [...chores])
         setHobbies(items => [...hobbies])
-
+        setTasks(items => [...dailies, ...habits, ...chores, ...hobbies])
+        
 
       })
+}
+
+  const subscribeFirebase = () => {
+    console.log('database SUBSCRIBED!')
+
+    subscribeActivities(dateOffset)    
+    subscribeTasks()
+    
   }
 
   const getAuth = () => {
@@ -150,14 +159,33 @@ const subscribeActivities = (dateOffset) => {
     }, [activities]
   )
 
+  const getActivityReward = (task) => {
+    const randVar = Math.floor(Math.random() * 9) + 1
+    let randConst = 1
+    if (randVar < 3) {
+      randConst = 0
+    }
+
+    if (randVar > 8) {
+      randConst = 2
+    }
+    
+    const importance = tasks.find(({id}) => id === task)?.importance || 0
+    return randConst * importance
+  }
 
 
-  const checkActivity = (task) => {
+  const checkActivity = (task) => {  
+
+    const project = tasks.find(({id}) => id === task)?.project || ''
+
     const newActivity = {
       id: Date.now(),
       timestamp: Date.now(),
       date: new Date(Date.now()),
-      task
+      task,
+      reward: getActivityReward(task),
+      project
     }
     db.collection("activities").add(newActivity)
       .then(function (docRef) {
@@ -183,7 +211,7 @@ const subscribeActivities = (dateOffset) => {
 
 
   const getTaskList = (tasks, showEditOrder) => tasks.map((task) => {
-    const { id, type, newSection, title } = task
+    const { id, type, newSection, title, importance } = task
 
     const markTask = ({ id }) => {
       if (marked.includes(id)) {
@@ -285,8 +313,13 @@ const subscribeActivities = (dateOffset) => {
     return `${addNullIfNeeded(hours)}:${addNullIfNeeded(minutes)}:${addNullIfNeeded(Math.floor(seconds))}`
   }
 
-  const listActivities = activities.map(({ task, id, timestamp, datetime, grade }, i) =>
-    <li key={id} className="activity-item">
+
+  const listActivities = activities.map(({ task, id, timestamp, datetime, grade, reward, project }, i) =>
+    {
+      const eee = tasks
+      
+      return (
+        <li key={id} className="activity-item">
 
       <div className="activity-text-section">
         <button className="grade-btn repeat-btn" onClick={() => checkActivity(task)}><BsArrowRepeat style={{ width: '20px', height: '20px' }} /></button>
@@ -298,9 +331,12 @@ const subscribeActivities = (dateOffset) => {
         <button className="grade-btn" disabled={grade == 200} onClick={() => updateGrade(id, 200)}>ok</button>
         <button className="grade-btn" disabled={grade == 300} onClick={() => updateGrade(id, 300)}>great</button>
         {timeSincePreviousActivityByIndex(timestamp, i)}
+        ----->{reward} .... {project}
       </div>
 
     </li>
+      )
+    }
   );
 
   const onReset = () => {
