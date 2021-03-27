@@ -313,6 +313,13 @@ const subscribeTasks = () => {
     return `${addNullIfNeeded(hours)}:${addNullIfNeeded(minutes)}:${addNullIfNeeded(Math.floor(seconds))}`
   }
 
+  const deleteActivity = id => {
+    db.collection('activities').doc(id).delete().then(() => {
+      console.log("Document successfully deleted!");
+  }).catch((error) => {
+      console.error("Error removing document: ", error);
+  });
+  }
 
   const listActivities = activities.map(({ task, id, timestamp, datetime, grade, reward, project }, i) =>
     {
@@ -331,7 +338,9 @@ const subscribeTasks = () => {
         <button className="grade-btn" disabled={grade == 200} onClick={() => updateGrade(id, 200)}>ok</button>
         <button className="grade-btn" disabled={grade == 300} onClick={() => updateGrade(id, 300)}>great</button>
         {timeSincePreviousActivityByIndex(timestamp, i)}
-        ----->{reward} .... {project}
+        <button className="grade-btn" onClick={() => deleteActivity(id)}>x</button>
+        
+        {/* ----->{reward} .... {project} ... {id} */}
       </div>
 
     </li>
