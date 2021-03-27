@@ -8,7 +8,7 @@ import {
 import './App.css';
 import firebase from 'firebase'
 import firebaseConfig from './config/firebase-config'
-import { BsArrowRepeat } from 'react-icons/bs';
+import { BsArrowRepeat, BsTrophy } from 'react-icons/bs';
 import TimeSince from './TimeSince'
 import RunHelpChore from './RunHelpChore';
 
@@ -25,6 +25,7 @@ function App() {
   const [hobbies, setHobbies] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [todaysReward, setTodaysReward] = useState(0);
   const [auth, setAuth] = useState('ok');
   const [dateOffset, setDateOffset] = useState(0);
 
@@ -72,6 +73,8 @@ const subscribeActivities = (dateOffset) => {
 
         })
         setActivities(items => [...activities])
+        const rewards = activities.map(activity => activity?.reward || 0)
+        setTodaysReward(rewards.reduce((prev, curr) => prev + curr, 0))
 
       })
 }
@@ -340,7 +343,8 @@ const subscribeTasks = () => {
         {timeSincePreviousActivityByIndex(timestamp, i)}
         <button className="grade-btn" onClick={() => deleteActivity(id)}>x</button>
         
-        {/* ----->{reward} .... {project} ... {id} */}
+         ----->{reward}
+          {/* .... {project} */}
       </div>
 
     </li>
@@ -418,7 +422,7 @@ const subscribeTasks = () => {
     const getDailiesByType = () => dailiesType === 'All' ? getDailies() : getTaskList(dailies, showEditOrder)
     const onShowEditOrder = () => setShowEditOrder(!showEditOrder)
 
-
+  
     return (
       <div className="super-wrapper" tabIndex="0">
         <button className="reset-btn" onClick={e => onReset()}>Reset</button>
@@ -468,6 +472,9 @@ const subscribeTasks = () => {
           <div className="task-log">
             <div className="time-since-wrapper">
               <TimeSince activities={activities} />
+            </div>
+            <div className="reward">
+              Today's reward: {todaysReward} <BsTrophy style={{color: '#F0E68C',  width: '40px', height: '40px' }}></BsTrophy>
             </div>
             <ol className="loglist">{listActivities}</ol>
             <button className="" style={{'paddingLeft': '50px', 'paddingRight': '50px', 'marginLeft': '50px'}} onClick={() => {
