@@ -9,11 +9,12 @@ import './App.css';
 import firebase from 'firebase'
 import firebaseConfig from './config/firebase-config'
 import { BsArrowRepeat, BsTrophy } from 'react-icons/bs';
-import TimeSince from './TimeSince'
-import RunHelpChore from './RunHelpChore';
+import TimeSince from './TimeSince';
+import api from './api';
 
 firebase.initializeApp(firebaseConfig)
 var db = firebase.firestore();
+var Api = api(db)
 
 function App() {
 
@@ -32,128 +33,56 @@ function App() {
   const doneColors = ['#0080001f', ' #008000a3', ' #008000c9', ' #008000']
   const notDoneColor = '#c5a7c736'
 
-  function myDateFormat(dateIn) {
-    var yyyy = dateIn.getFullYear()
-    var mm = dateIn.getMonth() + 1
-    var dd = dateIn.getDate()
-    var min = dateIn.getMinutes()
-    var hh = dateIn.getHours()
+  const updateTasks = (updateFn) => {
+    const update = tasks => {
+      let tasksByType = tasks.reduce((prev, curr) => {
+        if (!prev[curr.type]) prev[curr.type] = []
+        prev[curr.type] = [...prev[curr.type], curr]
+        return prev
+      }, {})
+      const { dailies, habits, chores, hobbies } = tasksByType
+  
+      setDailies(items => [...dailies])
+      setHabits(items => [...habits])
+      setChores(items => [...chores])
+      setHobbies(items => [...hobbies])
+      setTasks(items => tasks)
+    }
 
-    if (+mm < 10) mm = '0' + mm
-    if (+dd < 10) dd = '0' + dd
-    if (+hh < 10) hh = '0' + hh
-    if (+min < 10) min = '0' + min
-    return yyyy + '-' + mm + '-' + dd + ' => ' + hh + ':' + min
-  }
-
-const subscribeActivities = (dateOffset) => {
-  var date = new Date(Date.now()); 
-  var prev_date = new Date();
-  date.setDate(prev_date.getDate() - dateOffset);
-  date.setHours(0)
-  date.setMinutes(0)
-
-  db.collection("activities").orderBy("date", 'desc').where("date", ">", date)
-      .onSnapshot(function (querySnapshot) {
-        var activities = []
-        querySnapshot.forEach(doc => {
-          let datetime = new Date(doc.data().timestamp)
-
-          const datetimeStr = myDateFormat(datetime)
-          activities.push({
-            id: doc.id,
-            task: doc.data().task,
-            timestamp: doc.data().timestamp,
-            partOfDay: doc.data().partOfDay,
-            greade: doc.data().grade,
-            reward: doc.data().reward,
-            datetime: datetimeStr,
-            project: doc.data().project,
-          })
-
-        })
-        setActivities(items => [...activities])
-        const rewards = activities.map(activity => activity?.reward || 0)
-        setTodaysReward(rewards.reduce((prev, curr) => prev + curr, 0))
-
-      })
-}
-
-const subscribeTasks = () => {
-  db.collection("tasks").orderBy("order").where("active", "==", true)
-      .onSnapshot(function (querySnapshot) {
-        var tasks = []
-
-        // DEFINE tasks properties
-        querySnapshot.forEach(doc =>
-          tasks.push({
-            id: doc.id,
-            title: doc.data().title,
-            categories: doc.data().categories,
-            order: doc.data().order,
-            level: doc.data().level,
-            importance: doc.data().importance,
-            type: doc.data().type,
-            partOfDay: doc.data().partOfDay,
-            project: doc.data().project,
-          })
-        )
-
-        console.log(tasks)
-
-
-        let tasksByType = tasks.reduce((prev, curr) => {
-          if (!prev[curr.type]) prev[curr.type] = []
-          prev[curr.type] = [...prev[curr.type], curr]
-          return prev
-        }, {})
-
-        console.log(tasksByType)
-        const { dailies, habits, chores, hobbies } = tasksByType
-
-
-        setDailies(items => [...dailies])
-        setHabits(items => [...habits])
-        setChores(items => [...chores])
-        setHobbies(items => [...hobbies])
-        setTasks(items => [...dailies, ...habits, ...chores, ...hobbies])
-        
-
-      })
-}
-
-  const subscribeFirebase = () => {
-    console.log('database SUBSCRIBED!')
-
-    subscribeActivities(dateOffset)    
-    subscribeTasks()
+    updateFn(update)
     
   }
 
-  const getAuth = () => {
+  const updateActivitiesAndRewards = (updateFn) => {
+    const update = (activities) => {
+      setActivities(items => [...activities])
+      const rewards = activities.map(activity => activity?.reward || 0)
+      setTodaysReward(rewards.reduce((prev, curr) => prev + curr, 0))
+    }
+    updateFn(update, dateOffset)
+  }
 
-    firebase.auth().onAuthStateChanged(function (user) {
-      setAuth('yep')
-      window.user = user; // user is undefined if no user signed in
-      if (!user) {
-        var provider = new firebase.auth.GoogleAuthProvider();
-        provider.addScope('profile');
-        provider.addScope('email');
-        provider.addScope('https://www.googleapis.com/auth/plus.me');
-        firebase.auth().signInWithPopup(provider); // Opens a popup window and returns a promise to handle errors.
+  
 
-      } else {
-        // TODO this change to user for real :D 
-        setAuth('yep')
-      }
-    });
+  const subscribeFirebase = () => {
+    updateActivitiesAndRewards(Api.subscribeActivities)
+    updateTasks(Api.subscribeTasks)
   }
 
   useEffect(() => {
-    getAuth()
-    subscribeFirebase()
-    const storedMarked = JSON.parse(localStorage.getItem('marked'))
-    if (storedMarked) setMarked(storedMarked)
+    const doWHatNeeded = async function () {
+      const authenticated = await Api.getAuth()
+
+      if (authenticated) {
+        setAuth('yep')
+      }
+
+      subscribeFirebase()
+      const storedMarked = JSON.parse(localStorage.getItem('marked'))
+      if (storedMarked) setMarked(storedMarked)
+    }
+
+    doWHatNeeded()
   }, []);
 
   useEffect(
@@ -172,15 +101,15 @@ const subscribeTasks = () => {
     if (randVar > 8) {
       randConst = 2
     }
-    
-    const importance = tasks.find(({id}) => id === task)?.importance || 0
+
+    const importance = tasks.find(({ id }) => id === task)?.importance || 0
     return randConst * importance
   }
 
 
-  const checkActivity = (task) => {  
+  const checkActivity = (task) => {
 
-    const project = tasks.find(({id}) => id === task)?.project || ''
+    const project = tasks.find(({ id }) => id === task)?.project || ''
 
     const newActivity = {
       id: Date.now(),
@@ -226,8 +155,6 @@ const subscribeTasks = () => {
       setMarked([...marked, id])
     }
 
-    const showCheckedIcon = ({ id }) => activities.filter(({ task }) => task == id).length > 0
-
     const getColorByCountDone = ({ id }) => {
       const count = activities.filter(({ task }) => task == id).length
 
@@ -268,20 +195,6 @@ const subscribeTasks = () => {
     return getTaskList(dailiesToRender)
   }
 
-
-
-  const listTasks = () => {
-    return (
-      <div className="all-tasks">
-        <h3 className="main-sections-header">Habits</h3>
-        <ol className="habits">
-          {getTaskList(habits)}
-        </ol>
-      </div>
-    )
-  }
-
-
   const updateGrade = (activityId, grade) => {
     var activityRef = db.collection('activities').doc(activityId);
     activityRef
@@ -319,38 +232,36 @@ const subscribeTasks = () => {
   const deleteActivity = id => {
     db.collection('activities').doc(id).delete().then(() => {
       console.log("Document successfully deleted!");
-  }).catch((error) => {
+    }).catch((error) => {
       console.error("Error removing document: ", error);
-  });
+    });
   }
 
-  const listActivities = activities.map(({ task, id, timestamp, datetime, grade, reward, project }, i) =>
-    {
-      const eee = tasks
-      
-      return (
-        <li key={id} className="activity-item">
+  const listActivities = activities.map(({ task, id, timestamp, datetime, grade, reward, project }, i) => {
+    const eee = tasks
 
-      <div className="activity-text-section">
-        <button className="grade-btn repeat-btn" onClick={() => checkActivity(task)}><BsArrowRepeat style={{ width: '20px', height: '20px' }} /></button>
-        {task} - {datetime}
-      </div>
-      <div className="activity-btns-section">
+    return (
+      <li key={id} className="activity-item">
 
-        <button className="grade-btn" disabled={grade == 100} onClick={() => updateGrade(id, 100)}>just</button>
-        <button className="grade-btn" disabled={grade == 200} onClick={() => updateGrade(id, 200)}>ok</button>
-        <button className="grade-btn" disabled={grade == 300} onClick={() => updateGrade(id, 300)}>great</button>
-        {timeSincePreviousActivityByIndex(timestamp, i)}
-        <button className="grade-btn" onClick={() => deleteActivity(id)}>x</button>
-        
+        <div className="activity-text-section">
+          <button className="grade-btn repeat-btn" onClick={() => checkActivity(task)}><BsArrowRepeat style={{ width: '20px', height: '20px' }} /></button>
+          {task} - {datetime}
+        </div>
+        <div className="activity-btns-section">
+
+          <button className="grade-btn" disabled={grade == 100} onClick={() => updateGrade(id, 100)}>just</button>
+          <button className="grade-btn" disabled={grade == 200} onClick={() => updateGrade(id, 200)}>ok</button>
+          <button className="grade-btn" disabled={grade == 300} onClick={() => updateGrade(id, 300)}>great</button>
+          {timeSincePreviousActivityByIndex(timestamp, i)}
+          <button className="grade-btn" onClick={() => deleteActivity(id)}>x</button>
+
          ----->{reward}
           {/* .... {project} */}
-      </div>
+        </div>
 
-    </li>
-      )
-    }
-  );
+      </li>
+    )
+  });
 
   const onReset = () => {
     setMarked([])
@@ -422,7 +333,7 @@ const subscribeTasks = () => {
     const getDailiesByType = () => dailiesType === 'All' ? getDailies() : getTaskList(dailies, showEditOrder)
     const onShowEditOrder = () => setShowEditOrder(!showEditOrder)
 
-  
+
     return (
       <div className="super-wrapper" tabIndex="0">
         <button className="reset-btn" onClick={e => onReset()}>Reset</button>
@@ -474,13 +385,16 @@ const subscribeTasks = () => {
               <TimeSince activities={activities} />
             </div>
             <div className="reward">
-              Today's reward: {todaysReward} <BsTrophy style={{color: '#F0E68C',  width: '40px', height: '40px' }}></BsTrophy>
+              Today's reward: {todaysReward} <BsTrophy style={{ color: '#F0E68C', width: '40px', height: '40px' }}></BsTrophy>
             </div>
-            <ol className="loglist">{listActivities}</ol>
-            <button className="" style={{'paddingLeft': '50px', 'paddingRight': '50px', 'marginLeft': '50px'}} onClick={() => {
+            <ol className="loglist">
+              {listActivities}
+              {/* <Activities activities = {activities} db={db} tasks={tasks}></Activities> */}
+            </ol>
+            <button className="" style={{ 'paddingLeft': '50px', 'paddingRight': '50px', 'marginLeft': '50px' }} onClick={() => {
               let newDate = dateOffset + 1
               setDateOffset(prev => newDate)
-              subscribeActivities(newDate)
+              updateActivitiesAndRewards()
             }}>more ... </button>
 
           </div>
