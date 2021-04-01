@@ -1,10 +1,9 @@
-import firebaseConfig from './config/firebase-config'
 import firebase from 'firebase'
+import firebaseConfig from './config/firebase-config'
+firebase.initializeApp(firebaseConfig)
+var db = firebase.firestore();
 
-//firebase.initializeApp(firebaseConfig)
-//var db = firebase.firestore();
-
-const api = (db) => {
+const api = () => {
 
     function myDateFormat(dateIn) {
         var yyyy = dateIn.getFullYear()
@@ -99,15 +98,127 @@ const api = (db) => {
         })
     }
 
+    const checkActivity = (task, tasks) => {
+
+        const getActivityReward = (task) => {
+            const randVar = Math.floor(Math.random() * 9) + 1
+            let randConst = 1
+            if (randVar < 3) {
+                randConst = 0
+            }
+
+            if (randVar > 8) {
+                randConst = 2
+            }
+
+            const importance = tasks.find(({ id }) => id === task)?.importance || 0
+            return randConst * importance
+        }
+
+        const newActivity = {
+            id: Date.now(),
+            timestamp: Date.now(),
+            date: new Date(Date.now()),
+            task,
+            reward: getActivityReward(task),
+        }
+        db.collection("activities").add(newActivity)
+            .then(function (docRef) {
+                console.log("Document written with ID: ", docRef.id)
+            })
+            .catch(function (error) {
+                console.error("Error adding document: ", error)
+            });
+
+    }
+
+    const changeOrder = ({ id, order }, by) => {
+        db.collection("tasks").doc(id)
+            .update({ order: order - by })
+            .then(function () {
+                console.log("Document successfully updated!");
+            })
+            .catch(function (error) {
+                // The document probably doesn't exist.
+                console.error("Error updating document: ", error);
+            });
+    }
+
+    const updateGrade = (activityId, grade) => {
+        var activityRef = db.collection('activities').doc(activityId);
+        activityRef
+            .update({ grade })
+            .then(function () {
+                console.log("Document successfully updated!");
+            })
+            .catch(function (error) {
+                // The document probably doesn't exist.
+                console.error("Error updating document: ", error);
+            });
+    }
+
+    const deleteActivity = id => {
+        db.collection('activities').doc(id).delete().then(() => {
+            console.log("Document successfully deleted!");
+        }).catch((error) => {
+            console.error("Error removing document: ", error);
+        });
+    }
+
+    const saveTask = (title, type) => {
+        if (title == '' || type == '') {
+            alert('set task and type')
+            return
+        }
+        db.collection("tasks").doc(title).set({
+            active: true,
+            categories: [],
+            importance: 100,
+            isDaily: true,
+            level: 1,
+            order: 20,
+            type
+        })
+    }
+
+    const subscribeGoals = fn => {
+        db.collection("goals").orderBy("date")//.where("active", "==", true)
+            .onSnapshot(function (querySnapshot) {
+                var goals = []
+
+                // DEFINE tasks properties
+                querySnapshot.forEach(doc =>
+                    goals.push({
+                        id: doc.id,
+                        date: doc.data().date,
+                        mark: doc.data().mark,
+                    })
+                )
+                fn(goals)
+            })
+    }
+
+    const addGoal = goal => {
+        db.collection("goals").add(goal)
+            .then(function (docRef) {
+                console.log("Document written with ID: ", docRef.id)
+            })
+            .catch(function (error) {
+                console.error("Error adding document: ", error)
+            });
+    }
+
     return {
         subscribeActivities,
         subscribeTasks,
         getAuth: getAuth,
-        checkActivity: '',
-        changeOrder: '',
-        updateGrade: '',
-        deleteActivity: '',
-        saveTask: ''
+        checkActivity,
+        changeOrder,
+        updateGrade,
+        deleteActivity,
+        saveTask,
+        subscribeGoals,
+        addGoal
     }
 }
 
