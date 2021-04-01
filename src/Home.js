@@ -107,7 +107,10 @@ function Home({Api}) {
         <li key={id} className="task" style={{ marginTop: newSection ? "30px" : "0" }}>
           {showEditOrder && <button onClick={e => Api.changeOrder(task, +1)}>🔼</button>}
           {showEditOrder && <button onClick={e => Api.changeOrder(task, -1)}>🔽</button>}
-          <button onClick={e => Api.checkActivity(id, tasks)} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
+          <button onClick={e => {
+              Api.checkActivity(id, tasks);
+              Api.updateDailyPerformance(todaysReward, activities.length)
+          }} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
           <span className="task-title" onClick={e => markTask(task)}>
             {title || id}  {marked.includes(id) && '🥦'}{showEditOrder && (' - ' + task.order)}
           </span>
@@ -162,7 +165,16 @@ function Home({Api}) {
         <li key={id} className="activity-item">
 
           <div className="activity-text-section">
-            <button className="grade-btn repeat-btn" onClick={() => Api.checkActivity(task, tasks)}><BsArrowRepeat style={{ width: '20px', height: '20px' }} /></button>
+            <button className="grade-btn repeat-btn" onClick={async () => 
+                {
+                    await Api.checkActivity(task, tasks)
+                    Api.updateDailyPerformance(todaysReward, activities.length)
+                }
+                
+            }>
+                <BsArrowRepeat style={{ width: '20px', height: '20px' }} />
+                
+                </button>
             {task} - {datetime}
           </div>
           <div className="activity-btns-section">

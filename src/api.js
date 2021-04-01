@@ -100,6 +100,10 @@ const api = () => {
 
     const checkActivity = (task, tasks) => {
 
+
+        // return new Promise(resolve => {
+            
+        // })
         const getActivityReward = (task) => {
             const randVar = Math.floor(Math.random() * 9) + 1
             let randConst = 1
@@ -122,7 +126,7 @@ const api = () => {
             task,
             reward: getActivityReward(task),
         }
-        db.collection("activities").add(newActivity)
+        return db.collection("activities").add(newActivity)
             .then(function (docRef) {
                 console.log("Document written with ID: ", docRef.id)
             })
@@ -224,6 +228,17 @@ const api = () => {
             });
     }
 
+    const updateDailyPerformance = (reward, activitiesCount) => {
+        const id = new Date(Date.now()).toDateString()
+        const performance = {
+            date: new Date(Date.now()),
+            activitiesCount,
+            reward
+        }
+        db.collection('dailyPerformances').doc(id).set(performance, { merge: true })
+
+    }
+
     return {
         subscribeActivities,
         subscribeTasks,
@@ -235,7 +250,8 @@ const api = () => {
         saveTask,
         subscribeGoals,
         addGoal,
-        updateGoalMark
+        updateGoalMark,
+        updateDailyPerformance
     }
 }
 
