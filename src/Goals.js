@@ -17,7 +17,10 @@ function Goals({Api}) {
 
 
     const addGoal = () => {
-        const tosave = []
+        const tosave = [
+            'Active Learning (Anki, Notes)',
+            'Memory',
+        ]
         
         // [
         //     'Mindfulness',
@@ -32,25 +35,28 @@ function Goals({Api}) {
         //     'Professional',
         // ]
 
+        
+
         const goalstosave = tosave.map(title => {
             return {
                 title,
                 date: new Date(Date.now()),
                 mark: 5,
+                parent: 'Memory+Focus'
             }
         })
 
         goalstosave.forEach(gts => Api.addGoal(gts))
     }
 
-    const goalsList = goals.length > 0 ? goals.map((goal, id) => (<li key={id}>{goal.title}:  {goal.mark}</li>)): ''
+    const goalsList = goals.length > 0 ? goals.map((goal, id) => (<li key={id}>{goal?.parent} -- {goal.title}:  {goal.mark}</li>)): ''
 
     return (
         <div className="">
             
-            <ul>
+            <ol>
                 {goalsList}
-            </ul>
+            </ol>
             <button onClick={e => addGoal()} className="btn-main">add</button>
         </div>
     )

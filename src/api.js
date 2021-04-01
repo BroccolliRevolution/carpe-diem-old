@@ -107,7 +107,7 @@ const api = () => {
                 randConst = 0
             }
 
-            if (randVar > 8) {
+            if (randVar > 7) {
                 randConst = 2
             }
 
@@ -193,6 +193,7 @@ const api = () => {
                         date: doc.data().date,
                         mark: doc.data().mark,
                         title: doc.data().title,
+                        parent: doc.data().parent,
                     })
                 )
                 fn(goals)
