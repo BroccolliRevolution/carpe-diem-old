@@ -210,6 +210,20 @@ const api = () => {
             });
     }
 
+
+    const updateGoalMark = (goalId, mark) => {
+        var activityRef = db.collection('goals').doc(goalId);
+        activityRef
+            .update({ mark })
+            .then(function () {
+                console.log("Document successfully updated!");
+            })
+            .catch(function (error) {
+                // The document probably doesn't exist.
+                console.error("Error updating document: ", error);
+            });
+    }
+
     return {
         subscribeActivities,
         subscribeTasks,
@@ -220,7 +234,8 @@ const api = () => {
         deleteActivity,
         saveTask,
         subscribeGoals,
-        addGoal
+        addGoal,
+        updateGoalMark
     }
 }
 

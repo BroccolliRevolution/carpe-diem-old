@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-function Goals({Api}) {
+function Goals({ Api }) {
     const [goals, setGoals] = useState([]);
 
 
     useEffect(() => {
         //if (!db.collection) return
 
-       Api.subscribeGoals(g => {
-           console.log(g)
-           
-        setGoals(_ => g)
-       })
+        Api.subscribeGoals(g => {
+            console.log(g)
+
+            setGoals(_ => g)
+        })
     }, []);
 
 
@@ -21,21 +21,6 @@ function Goals({Api}) {
             'Active Learning (Anki, Notes)',
             'Memory',
         ]
-        
-        // [
-        //     'Mindfulness',
-        //     'Accountability',
-        //     'Exercise',
-        //     'Food',
-        //     'Sleep',
-        //     'Book',
-        //     'Audiobooks',
-        //     'Learning',
-        //     'Memory+Focus',
-        //     'Professional',
-        // ]
-
-        
 
         const goalstosave = tosave.map(title => {
             return {
@@ -49,14 +34,21 @@ function Goals({Api}) {
         goalstosave.forEach(gts => Api.addGoal(gts))
     }
 
-    const goalsList = goals.length > 0 ? goals.map((goal, id) => (<li key={id}>{goal?.parent} -- {goal.title}:  {goal.mark}</li>)): ''
+    const goalsList = goals.length > 0 ? goals.map((goal, id) =>
+    (<li key={id}>
+        <input min="0" max="10" 
+        style={{width:'30px'}} 
+        type="number" 
+        value={goal.mark} onChange={e => Api.updateGoalMark(goal.id, e.target.value)}/>
+         ====  {goal?.parent} -- {goal.title}
+    </li>)) : ''
 
     return (
         <div className="">
-            
-            <ol>
+
+            <ul>
                 {goalsList}
-            </ol>
+            </ul>
             <button onClick={e => addGoal()} className="btn-main">add</button>
         </div>
     )
