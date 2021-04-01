@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { BsArrowRepeat, BsTrophy } from 'react-icons/bs';
-import firebase from 'firebase'
 
 function Goals({Api}) {
     const [goals, setGoals] = useState([]);
@@ -13,24 +11,39 @@ function Goals({Api}) {
        Api.subscribeGoals(g => {
            console.log(g)
            
-        setGoals(g => goals)
+        setGoals(_ => g)
        })
     }, []);
 
 
     const addGoal = () => {
+        const tosave = []
         
+        // [
+        //     'Mindfulness',
+        //     'Accountability',
+        //     'Exercise',
+        //     'Food',
+        //     'Sleep',
+        //     'Book',
+        //     'Audiobooks',
+        //     'Learning',
+        //     'Memory+Focus',
+        //     'Professional',
+        // ]
 
-        const goal = {
-            // id: Date.now(),
-            title: 'management',
-            //date: new Date(Date.now()),
-            mark: 90900
-        }
-        Api.addGoal(goal)
+        const goalstosave = tosave.map(title => {
+            return {
+                title,
+                date: new Date(Date.now()),
+                mark: 5,
+            }
+        })
+
+        goalstosave.forEach(gts => Api.addGoal(gts))
     }
 
-    const goalsList = goals.length > 0 ? goals.map((goal, id) => (<li key={id}>{goal.id} - {goal.title}</li>)): ''
+    const goalsList = goals.length > 0 ? goals.map((goal, id) => (<li key={id}>{goal.title}:  {goal.mark}</li>)): ''
 
     return (
         <div className="">

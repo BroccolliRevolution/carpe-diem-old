@@ -192,6 +192,7 @@ const api = () => {
                         id: doc.id,
                         date: doc.data().date,
                         mark: doc.data().mark,
+                        title: doc.data().title,
                     })
                 )
                 fn(goals)
