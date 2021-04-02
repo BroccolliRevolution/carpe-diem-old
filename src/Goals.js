@@ -643,7 +643,6 @@ function Goals({ Api }) {
             const goal = gts
             goal.date = nowDate
             goal.datetime = datetimenow
-            console.log(goal)
             Api.addGoal(goal)
         })
     }
@@ -662,7 +661,7 @@ function Goals({ Api }) {
                 {goalsList}
             </ul>
 
-            <button onClick={e => addBulk()} className="btn-main">TEST</button>
+            {/* <button onClick={e => addBulk()} className="btn-main">TEST</button> */}
             <button onClick={e => addNewGoalRewiew()} className="btn-main">ADD REVIEW</button>
 
         </div>
