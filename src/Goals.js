@@ -26,7 +26,10 @@ function Goals({ Api }) {
 
             const prev = g.filter(goal => goal.date === nowDate)
 
-            setGoals(_ => g)
+            setGoals(_ => g.map(go => {
+                if (go.parent == undefined) go.parent = ''
+                return go
+            }).sort(dynamicSort('parent')))
             setPrevGoals(_ => prev)
 
             console.log(prev)
@@ -64,20 +67,238 @@ function Goals({ Api }) {
         setTitle('')
     }
 
+    function dynamicSort(property) {
+        var sortOrder = 1;
+        if(property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+        return function (a,b) {
+            /* next line works with strings and numbers, 
+             * and you may want to customize it to your needs
+             */
+            var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+            return result * sortOrder;
+        }
+    }
 
-    const goalsList = goals.length > 0 ? goals.filter(goal => goal.date === goals[0]?.date).map((goal, id) =>
-    (<li key={id}>
-        {prevGoals.find(g => g.title === goal.title)?.mark} - {prevGoals.find(g => g.title === goal.title)?.date}
-        <input min="0" max="10"
-            style={{ width: '30px' }}
-            type="number"
-            value={goal.mark} onChange={e => Api.updateGoalMark(goal.id, e.target.value)} />
-         ====  {goal.date} --  {goal?.parent} -- {goal.title}
-    </li>)) : ''
+
+    const goalsList = goals.length > 0 ? goals.filter(goal => goal.date === goals[0]?.date)
+        .sort(dynamicSort('parent'))
+        .map((goal, id) =>
+        (<li key={id}>
+            {prevGoals.find(g => g.title === goal.title)?.mark} - {prevGoals.find(g => g.title === goal.title)?.date}
+            <input min="0" max="10"
+                style={{ width: '30px' }}
+                type="number"
+                value={goal.mark} onChange={e => Api.updateGoalMark(goal.id, e.target.value)} />
+         ====  {goal.date} --  {goal?.parent ? goal.parent + '---> ' : ''} {goal.title}
+        </li>)) : ''
 
 
 
     const addBulk = async () => {
+
+        return
+        const ttt = [
+            {
+                "id": "6uZQeTvlcMOBNpNmrwFf",
+                "date": "Thu Apr 01 2021",
+                "mark": "8",
+                "title": "Philosophy",
+                "parent": "Education"
+            },
+            {
+                "id": "9PF5Rs7cRquWAdTPhUeL",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Tech Course",
+                "parent": "Education"
+            },
+            {
+                "id": "9Tt1FGzn02kCAuHN85xX",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "TODOs",
+                "parent": "Accountability"
+            },
+            {
+                "id": "DADrDVJ34ZkseENd7NaL",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Alcohol Abstinency",
+                "parent": "Food"
+            },
+            {
+                "id": "Hu2dvPvLBcIra2mOBs3H",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Mindfulness"
+            },
+            {
+                "id": "IEPhEqSm1bVwe6oxmhp4",
+                "date": "Thu Apr 01 2021",
+                "mark": 10,
+                "title": "Book"
+            },
+            {
+                "id": "JDtZyeLFU9OYee9xKKVO",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Stretching",
+                "parent": "Health/Body"
+            },
+            {
+                "id": "LSTwg6og3LSlB2ZCqOWe",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Exercise",
+                "parent": "Health/Body"
+            },
+            {
+                "id": "RjiYF1J1UsI4AtmXLF4I",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Professional"
+            },
+            {
+                "id": "TLhBJPntAieBahLMGBi4",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "MOOC",
+                "parent": "Education"
+            },
+            {
+                "id": "VFp64iGZG6Wd11UNgHBF",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Audiobooks"
+            },
+            {
+                "id": "YmJKpqBLr7eGdUUXGoBs",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Sleep"
+            },
+            {
+                "id": "ZmYuvGp5dPzfyOK9t1so",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Yoga",
+                "parent": "Mindfulness"
+            },
+            {
+                "id": "afR63Junz7lHalWI8eHt",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Tech Podcast",
+                "parent": "Education"
+            },
+            {
+                "id": "cYH3zM9JCGpyzqL3QNAV",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Memory+Focus"
+            },
+            {
+                "id": "ckSU8lTtWzATO6mdRtyZ",
+                "date": "Thu Apr 01 2021",
+                "mark": "8",
+                "title": "Education"
+            },
+            {
+                "id": "eKpjsmbwszVke2jcddLH",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Review/Planning",
+                "parent": "Accountability"
+            },
+            {
+                "id": "ieZKl8DeU6OSMe1mHqIh",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Memory",
+                "parent": "Memory+Focus"
+            },
+            {
+                "id": "jQjdAZzT541S2ZYSMIYC",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Accountability"
+            },
+            {
+                "id": "kUy6b827JZZAnYhVi3Gr",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Cold Shower",
+                "parent": "Health/Body"
+            },
+            {
+                "id": "m6HHp98E7eXjGcwr8fO3",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Meditation",
+                "parent": "Mindfulness"
+            },
+            {
+                "id": "nNB3hdt5gcGmjeqgLvx7",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Journal",
+                "parent": "Accountability"
+            },
+            {
+                "id": "nTwG5JaQHqCnUAfCNVvX",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Health/Body"
+            },
+            {
+                "id": "nU9w6PewtgJlSYzKZANc",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Active Learning (Anki, Notes)",
+                "parent": "Memory+Focus"
+            },
+            {
+                "id": "omYNhoX09EiWZbjxssNd",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Fasting",
+                "parent": "Food"
+            },
+            {
+                "id": "pgzBUDRwZ0IlmWekjPMZ",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Food"
+            },
+            {
+                "id": "rvRa3C1n6t78JmdzDZSc",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Podcast",
+                "parent": "Education"
+            },
+            {
+                "id": "w1UTjx1FMwa4DAuDyhQ3",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Supplements",
+                "parent": "Food"
+            },
+            {
+                "id": "y3b2cZ4gm2YazCLPfa8M",
+                "date": "Thu Apr 01 2021",
+                "mark": 5,
+                "title": "Healthy Eating",
+                "parent": "Food"
+            }
+        ]
+
+        ttt.forEach(gts => Api.addGoal(gts))
+    }
+    const addBulkOld = async () => {
 
 
         // console.log(new Date(Date.now()))
@@ -403,30 +624,21 @@ function Goals({ Api }) {
 
 
     const addNewGoalRewiew = async () => {
-
-
-        const allGoals = await Api.getAllGoals()
-
-        const first = allGoals[0]
-        const date = first.date
-
-
-        console.log(date)
-
-
-
-        const lastGoals = allGoals.filter(goal => goal.date === date)
-        console.log(allGoals)
-        console.log(lastGoals)
-
-        return
-
-
         var d = new Date();
         d.setDate(d.getDate());
 
         const datetimenow = d
         const nowDate = d.toDateString()
+
+        const alreadyReviewedToday = goals.some(g => g.date === nowDate)
+        if (alreadyReviewedToday) return
+
+        const allGoals = await Api.getAllGoals()
+
+        const first = allGoals[0]
+        const date = first.date
+        const lastGoals = allGoals.filter(goal => goal.date === date)
+
         lastGoals.forEach(gts => {
             const goal = gts
             goal.date = nowDate
