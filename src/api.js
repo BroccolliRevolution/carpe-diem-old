@@ -186,7 +186,7 @@ const api = () => {
     }
 
     const subscribeGoals = fn => {
-        db.collection("goals").orderBy("date")//.where("active", "==", true)
+        db.collection("goals").orderBy("date", "asc")//.where("active", "==", true)
             .onSnapshot(function (querySnapshot) {
                 var goals = []
 
@@ -239,6 +239,11 @@ const api = () => {
 
     }
 
+    const getAllGoals = async () => {
+        const snapshot = await db.collection('goals').orderBy("date", "asc").get()
+        return snapshot.docs.map(doc => doc.data());
+    }
+
     return {
         subscribeActivities,
         subscribeTasks,
@@ -251,7 +256,8 @@ const api = () => {
         subscribeGoals,
         addGoal,
         updateGoalMark,
-        updateDailyPerformance
+        updateDailyPerformance,
+        getAllGoals
     }
 }
 
