@@ -19,6 +19,7 @@ function Home({ Api }) {
     const [activities, setActivities] = useState([]);
     const [todaysReward, setTodaysReward] = useState(0);
     const [dateOffset, setDateOffset] = useState(0);
+    const [excellenceReward, setExcellenceReward] = useState(0);
 
 
     const [dailiesType, setDailiesType] = useState('All');
@@ -52,15 +53,20 @@ function Home({ Api }) {
         const update = (activities) => {
             setActivities(items => [...activities])
             const rewards = activities.map(activity => activity?.reward || 0)
-            setTodaysReward(rewards.reduce((prev, curr) => prev + curr, 0))
+            //setTodaysReward(rewards.reduce((prev, curr) => prev + curr, 0))
         }
         updateFn(update, dateOffset)
     }
 
+    const updateDailyPerformance = (updateFn) => {
+        const update = ({ reward }) => setTodaysReward(reward)
+        updateFn(update)
+    }
 
     const subscribeFirebase = () => {
         updateActivitiesAndRewards(Api.subscribeActivities)
         updateTasks(Api.subscribeTasks)
+        updateDailyPerformance(Api.getDailyPerformance)
     }
 
     useEffect(() => {
@@ -107,9 +113,9 @@ function Home({ Api }) {
             <li key={id} className="task" style={{ marginTop: newSection ? "30px" : "0" }}>
                 {showEditOrder && <button onClick={e => Api.changeOrder(task, +1)}>🔼</button>}
                 {showEditOrder && <button onClick={e => Api.changeOrder(task, -1)}>🔽</button>}
-                <button onClick={e => {
-                    Api.checkActivity(id, tasks);
-                    Api.updateDailyPerformance(todaysReward, activities.length)
+                <button onClick={async e => {
+                    const { reward } = await Api.checkActivity(id, tasks)
+                    Api.updateDailyPerformance(todaysReward + reward, activities.length)
                 }} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
                 <span className="task-title" onClick={e => markTask(task)}>
                     {title || id}  {marked.includes(id) && '🥦'}{showEditOrder && (' - ' + task.order)}
@@ -166,10 +172,9 @@ function Home({ Api }) {
 
                 <div className="activity-text-section">
                     <button className="grade-btn repeat-btn" onClick={async () => {
-                        await Api.checkActivity(task, tasks)
-                        Api.updateDailyPerformance(todaysReward, activities.length)
+                        const { reward } = await Api.checkActivity(task, tasks)
+                        Api.updateDailyPerformance(todaysReward + reward, activities.length)
                     }
-
                     }>
                         <BsArrowRepeat style={{ width: '20px', height: '20px' }} />
 
@@ -196,6 +201,20 @@ function Home({ Api }) {
         setMarked([])
     }
 
+    const getRandReward = () => {
+        const randVar = Math.floor(Math.random() * 9) + 1
+        let randConst = 1
+        if (randVar < 3) {
+            randConst = 0
+        }
+
+        if (randVar > 7) {
+            randConst = 2
+        }
+
+        const importance = 1000
+        return randConst * importance
+    }
 
     return (
         <div className="super-wrapper" tabIndex="0">
@@ -249,6 +268,13 @@ function Home({ Api }) {
                     </div>
                     <div className="reward">
                         Today's reward: {todaysReward} <BsTrophy style={{ color: '#F0E68C', width: '40px', height: '40px' }}></BsTrophy>
+                        <button className="excellence-button" onClick={() => {
+                            const newExcellenceReward = getRandReward()
+                            const newReward = todaysReward + newExcellenceReward
+                            setExcellenceReward(newExcellenceReward)
+                            setTimeout(_ => setExcellenceReward(0), 4000)
+                            Api.updateDailyPerformance(newReward, activities.length)
+                        }}>EXCELLENCE</button> {excellenceReward ? '+' : ''} {excellenceReward || ''}
                     </div>
                     <ol className="loglist">
                         {listActivities}

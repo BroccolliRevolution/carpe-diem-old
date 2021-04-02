@@ -99,41 +99,39 @@ const api = () => {
     }
 
     const checkActivity = (task, tasks) => {
+        return new Promise(resolve => {
 
+            const getActivityReward = (task) => {
+                const randVar = Math.floor(Math.random() * 9) + 1
+                let randConst = 1
+                if (randVar < 3) {
+                    randConst = 0
+                }
 
-        // return new Promise(resolve => {
-            
-        // })
-        const getActivityReward = (task) => {
-            const randVar = Math.floor(Math.random() * 9) + 1
-            let randConst = 1
-            if (randVar < 3) {
-                randConst = 0
+                if (randVar > 7) {
+                    randConst = 2
+                }
+
+                const importance = tasks.find(({ id }) => id === task)?.importance || 0
+                return randConst * importance
             }
 
-            if (randVar > 7) {
-                randConst = 2
+            const newActivity = {
+                id: Date.now(),
+                timestamp: Date.now(),
+                date: new Date(Date.now()),
+                task,
+                reward: getActivityReward(task),
             }
-
-            const importance = tasks.find(({ id }) => id === task)?.importance || 0
-            return randConst * importance
-        }
-
-        const newActivity = {
-            id: Date.now(),
-            timestamp: Date.now(),
-            date: new Date(Date.now()),
-            task,
-            reward: getActivityReward(task),
-        }
-        return db.collection("activities").add(newActivity)
-            .then(function (docRef) {
-                console.log("Document written with ID: ", docRef.id)
-            })
-            .catch(function (error) {
-                console.error("Error adding document: ", error)
-            });
-
+            db.collection("activities").add(newActivity)
+                .then(function (docRef) {
+                    resolve(newActivity)
+                    console.log("Document written with ID: ", docRef.id)
+                })
+                .catch(function (error) {
+                    console.error("Error adding document: ", error)
+                });
+        })
     }
 
     const changeOrder = ({ id, order }, by) => {
@@ -236,12 +234,20 @@ const api = () => {
             reward
         }
         db.collection('dailyPerformances').doc(id).set(performance, { merge: true })
-
     }
 
     const getAllGoals = async () => {
         const snapshot = await db.collection('goals').orderBy("date", "asc").get()
         return snapshot.docs.map(doc => doc.data());
+    }
+
+    const getDailyPerformance = async (fn) => {
+        const date = new Date(Date.now()).toDateString()
+
+        db.collection("dailyPerformances").doc(date)
+            .onSnapshot((doc) => {
+                fn(doc.data())
+            });
     }
 
     return {
@@ -257,6 +263,7 @@ const api = () => {
         addGoal,
         updateGoalMark,
         updateDailyPerformance,
+        getDailyPerformance,
         getAllGoals
     }
 }
