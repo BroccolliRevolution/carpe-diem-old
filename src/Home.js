@@ -214,7 +214,7 @@ function Home({ Api }) {
             randConst = 2
         }
 
-        const importance = 1000
+        const importance = 100
         return randConst * importance
     }
 
