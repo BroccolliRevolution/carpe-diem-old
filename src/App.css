@@ -132,7 +132,9 @@
   cursor: pointer;
 }
 
-
+.todays-reward {
+  font-weight: bold;
+}
 
 /* TEST */
 .btn-show {

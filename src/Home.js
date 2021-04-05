@@ -18,6 +18,7 @@ function Home({ Api }) {
     const [tasks, setTasks] = useState([]);
     const [activities, setActivities] = useState([]);
     const [todaysReward, setTodaysReward] = useState(0);
+    const [todaysActivitiesCount, setTodaysActivitiesCount] = useState(0);
     const [dateOffset, setDateOffset] = useState(0);
     const [excellenceReward, setExcellenceReward] = useState(0);
 
@@ -59,7 +60,10 @@ function Home({ Api }) {
     }
 
     const updateDailyPerformance = (updateFn) => {
-        const update = ({ reward }) => setTodaysReward(reward)
+        const update = (perf) => {
+            setTodaysReward(perf?.reward)
+            setTodaysActivitiesCount(perf?.activitiesCount)
+        }
         updateFn(update)
     }
 
@@ -80,9 +84,6 @@ function Home({ Api }) {
             localStorage.setItem('marked', JSON.stringify(marked))
         }, [activities]
     )
-
-
-
 
     const getTaskList = (tasks, showEditOrder) => tasks.map((task) => {
         const { id, type, newSection, title, importance } = task
@@ -114,8 +115,9 @@ function Home({ Api }) {
                 {showEditOrder && <button onClick={e => Api.changeOrder(task, +1)}>🔼</button>}
                 {showEditOrder && <button onClick={e => Api.changeOrder(task, -1)}>🔽</button>}
                 <button onClick={async e => {
-                    const { reward } = await Api.checkActivity(id, tasks)
-                    Api.updateDailyPerformance(todaysReward + reward, activities.length)
+                    const { reward } = await Api.checkActivity(id, tasks) || 0
+                    const todaysrew = todaysReward || 0
+                    Api.updateDailyPerformance(todaysrew + reward, activities.length + 1)
                 }} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
                 <span className="task-title" onClick={e => markTask(task)}>
                     {title || id}  {marked.includes(id) && '🥦'}{showEditOrder && (' - ' + task.order)}
@@ -267,7 +269,8 @@ function Home({ Api }) {
                         <TimeSince activities={activities} />
                     </div>
                     <div className="reward">
-                        Today's reward: {todaysReward} <BsTrophy style={{ color: '#F0E68C', width: '40px', height: '40px' }}></BsTrophy>
+                    Today's reward: <span className="todays-reward">{todaysReward} </span>,- ({todaysActivitiesCount} activities) 
+                        <BsTrophy style={{ color: '#F0E68C', width: '40px', height: '40px' }}></BsTrophy>
                         <button className="excellence-button" onClick={() => {
                             const newExcellenceReward = getRandReward()
                             const newReward = todaysReward + newExcellenceReward
