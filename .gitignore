@@ -14,6 +14,9 @@
 # config
 /src/config
 
+# jupyter
+/Review/.ipynb_checkpoints
+
 # misc
 .DS_Store
 .env.local
