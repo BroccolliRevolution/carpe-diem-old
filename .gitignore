@@ -17,6 +17,9 @@
 # jupyter
 /Review/.ipynb_checkpoints
 
+# Review data
+/Review/data
+
 # misc
 .DS_Store
 .env.local
