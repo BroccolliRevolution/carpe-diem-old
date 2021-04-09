@@ -103,18 +103,27 @@ const api = () => {
 
             const getActivityReward = (task) => {
                 const randVar = Math.floor(Math.random() * 9) + 1
+                
                 let randConst = 1
                 if (randVar < 3) {
                     randConst = 0
                 }
 
-                if (randVar > 7) {
+                if (randVar > 8) {
                     randConst = 2
                 }
 
                 const importance = tasks.find(({ id }) => id === task)?.importance || 0
-                return randConst * importance
+                const extra = Math.random()
+
+
+                let res = Math.floor((randConst + extra) * importance)
+                if (randConst === 0) res = 0
+
+                return res
             }
+
+            getActivityReward(task)
 
             const newActivity = {
                 id: Date.now(),
