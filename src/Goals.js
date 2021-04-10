@@ -98,7 +98,6 @@ function Goals({ Api }) {
         lastGoals.forEach(gts => {
             const goal = gts
             goal.date = nowDate
-            //goal.datetime = datetimenow
             Api.addGoal(goal)
         })
     }
