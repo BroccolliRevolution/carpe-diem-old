@@ -8,7 +8,7 @@ data['tasks'] = []
 
 
 # Use a service account
-cred = credentials.Certificate('../src/config/python-conf.json')
+cred = credentials.Certificate('/home/peto/Code/carpe-diem/src/config/python-conf.json')
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
@@ -30,5 +30,5 @@ for doc in docs:
     })
  #   print(f'{doc.id} => {doc.to_dict()}')
 
-with open('./data/data.json', 'w') as outfile:
+with open('/home/peto/Code/carpe-diem/Review/data/data.json', 'w') as outfile:
     json.dump(data, outfile)
