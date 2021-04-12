@@ -117,20 +117,24 @@ const api = () => {
                 const extra = Math.random()
 
 
-                let res = Math.floor((randConst + extra) * importance)
-                if (randConst === 0) res = 0
+                let res = {
+                    reward: Math.floor((randConst + extra) * importance),
+                    score: importance
+                }
+                if (randConst === 0) res.reward = 0
 
                 return res
             }
 
-            getActivityReward(task)
 
+            const {reward, score} = getActivityReward(task)
             const newActivity = {
                 id: Date.now(),
                 timestamp: Date.now(),
                 date: new Date(Date.now()),
                 task,
-                reward: getActivityReward(task),
+                reward,
+                score
             }
             db.collection("activities").add(newActivity)
                 .then(function (docRef) {
@@ -235,12 +239,13 @@ const api = () => {
             });
     }
 
-    const updateDailyPerformance = (reward, activitiesCount) => {
+    const updateDailyPerformance = (reward, score, activitiesCount) => {
         const id = new Date(Date.now()).toDateString()
         const performance = {
             date: new Date(Date.now()),
             activitiesCount,
-            reward
+            reward,
+            score
         }
         db.collection('dailyPerformances').doc(id).set(performance, { merge: true })
     }

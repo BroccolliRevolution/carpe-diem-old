@@ -18,6 +18,7 @@ function Home({ Api }) {
     const [tasks, setTasks] = useState([]);
     const [activities, setActivities] = useState([]);
     const [todaysReward, setTodaysReward] = useState(0);
+    const [todaysScore, setTodaysScore] = useState(0);
     const [todaysActivitiesCount, setTodaysActivitiesCount] = useState(0);
     const [dateOffset, setDateOffset] = useState(0);
     const [excellenceReward, setExcellenceReward] = useState(0);
@@ -62,6 +63,7 @@ function Home({ Api }) {
     const updateDailyPerformance = (updateFn) => {
         const update = (perf) => {
             setTodaysReward(perf?.reward)
+            setTodaysReward(perf?.score)
             setTodaysActivitiesCount(perf?.activitiesCount)
         }
         updateFn(update)
@@ -115,9 +117,9 @@ function Home({ Api }) {
                 {showEditOrder && <button onClick={e => Api.changeOrder(task, +1)}>🔼</button>}
                 {showEditOrder && <button onClick={e => Api.changeOrder(task, -1)}>🔽</button>}
                 <button onClick={async e => {
-                    const { reward } = await Api.checkActivity(id, tasks) || 0
+                    const { reward, score } = await Api.checkActivity(id, tasks) || 0
                     const todaysrew = todaysReward || 0
-                    Api.updateDailyPerformance(todaysrew + reward, activities.length + 1)
+                    Api.updateDailyPerformance(todaysrew + reward, score, activities.length + 1)
                 }} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
                 <span className="task-title" onClick={e => markTask(task)}>
                     {title || id}  {marked.includes(id) && '🥦'}{showEditOrder && (' - ' + task.order)}
@@ -163,19 +165,16 @@ function Home({ Api }) {
 
         return `${addNullIfNeeded(hours)}:${addNullIfNeeded(minutes)}:${addNullIfNeeded(Math.floor(seconds))}`
     }
-
-
+    
 
     const listActivities = activities.map(({ task, id, timestamp, datetime, grade, reward, project }, i) => {
-        const eee = tasks
-
         return (
             <li key={id} className="activity-item">
 
                 <div className="activity-text-section">
                     <button className="grade-btn repeat-btn" onClick={async () => {
-                        const { reward } = await Api.checkActivity(task, tasks)
-                        Api.updateDailyPerformance(todaysReward + reward, activities.length)
+                        const { reward, score } = await Api.checkActivity(task, tasks)
+                        Api.updateDailyPerformance(todaysReward + reward, score, activities.length)
                     }
                     }>
                         <BsArrowRepeat style={{ width: '20px', height: '20px' }} />
