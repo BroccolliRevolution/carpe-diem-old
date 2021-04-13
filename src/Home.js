@@ -164,35 +164,68 @@ function Home({ Api }) {
 
         return `${addNullIfNeeded(hours)}:${addNullIfNeeded(minutes)}:${addNullIfNeeded(Math.floor(seconds))}`
     }
-    
+
+
+    const showDate = (i) => {
+        if (i === 0) return ''
+        const curr = activities[i]?.datetime.split(' => ')[0]
+        const prev = activities[i - 1]?.datetime.split(' => ')[0]
+
+
+        if (curr != prev) {
+            console.log(curr, prev)
+
+            return curr
+        }
+        return ''
+    }
+
+    const showTime = (datetime) => datetime.split(' => ')[1]
+
 
     const listActivities = activities.map(({ task, id, timestamp, datetime, grade, reward, score, project }, i) => {
         return (
             <li key={id} className="activity-item">
 
-                <div className="activity-text-section">
-                    <button className="grade-btn repeat-btn" onClick={async () => {
-                        const { reward, score } = await Api.checkActivity(task, tasks)
-                        Api.updateDailyPerformance(todaysReward + reward, todaysScore + score, activities.length)
-                    }
-                    }>
-                        <BsArrowRepeat style={{ width: '20px', height: '20px' }} />
+                <div className="activity-main-info-section">
+                    <div className="first-info-wrapper">
+                        <div className="task-main">
+                            <button className="grade-btn repeat-btn" onClick={async () => {
+                                const { reward, score } = await Api.checkActivity(task, tasks)
+                                Api.updateDailyPerformance(todaysReward + reward, todaysScore + score, activities.length)
+                            }
+                            }>
+                                <BsArrowRepeat style={{ width: '20px', height: '20px' }} />
+                            </button>
+                            <div class="tooltip">{task}
+                                <span class="tooltiptext">{showTime(datetime)}</span>
+                            </div>
+                        </div>
+                        <div className="task-date">{showDate(i)}</div>
+                    </div>
 
-                    </button>
-                    {task} - {datetime}
+                    <div className="activity-score">
+                        <span className="score-text">
+                            {reward}/{score}
+                        </span>
+                    </div>
+                </div>
+                <div className="time-since-activity">
+                    <span className="timesince-text">
+                        {timeSincePreviousActivityByIndex(timestamp, i)}
+                    </span>
                 </div>
                 <div className="activity-btns-section">
 
                     <button className="grade-btn" disabled={grade == 100} onClick={() => Api.updateGrade(id, 100)}>just</button>
                     <button className="grade-btn" disabled={grade == 200} onClick={() => Api.updateGrade(id, 200)}>ok</button>
                     <button className="grade-btn" disabled={grade == 300} onClick={() => Api.updateGrade(id, 300)}>great</button>
-                    {timeSincePreviousActivityByIndex(timestamp, i)}
+
                     <button className="grade-btn" onClick={() => {
                         Api.deleteActivity(id)
                         Api.updateDailyPerformance(todaysReward - reward, todaysScore - score, activities.length)
                     }}>x</button>
 
-         ----->{reward}/{score}
                     {/* .... {project} */}
                 </div>
 
@@ -270,7 +303,7 @@ function Home({ Api }) {
                         <TimeSince activities={activities} />
                     </div>
                     <div className="reward">
-                    Today's reward: <span className="todays-reward">{todaysReward} </span>,- ({todaysActivitiesCount} activities) 
+                        Today's reward: <span className="todays-reward">{todaysReward} </span>,- ({todaysActivitiesCount} activities)
                         <BsTrophy style={{ color: '#F0E68C', width: '40px', height: '40px' }}></BsTrophy>
                         score: {todaysScore}
                         <button className="excellence-button" onClick={() => {

@@ -74,14 +74,33 @@
 
 .activity-item {
   display: flex;
+  width: 100%;
   max-width: 600px;
-  min-width: 520px;
   justify-content: space-between;
   align-items: center;
 }
 
+.activity-main-info-section {
+  display: flex;
+  align-items: center;
+  flex: 1 1 40%;
+  justify-content: space-between;
+}
+
 .activity-btns-section {
   align-items: center;
+  flex: 1 1 30%;
+}
+
+.activity-score {
+  align-items: center;
+  padding: 7px;
+}
+
+.time-since-activity {
+  align-items: center;
+  flex: 1 1 10%;
+  text-align: center;
 }
 
 .time-since-wrapper {
@@ -164,3 +183,31 @@
 }
 
 
+
+
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
