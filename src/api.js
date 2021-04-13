@@ -109,25 +109,36 @@ const api = () => {
                     randConst = 0
                 }
 
-                if (randVar > 8) {
-                    randConst = 2
-                }
-
                 const importance = tasks.find(({ id }) => id === task)?.importance || 0
-                const extra = Math.random()
 
+
+                // TODO this extra is KEY - it will depend on level and maybe other things
+                const maxExtra = 20
+                const extra = Math.floor(Math.random() * maxExtra) + 1
+
+
+                // TODO this penalty will not be random in future
+                const randVarPen = Math.floor(Math.random() * 9) + 1
+                
+                const maxPen = 20
+                let penalty = 0
+                if (randVarPen < 3) {
+                    penalty = Math.floor(Math.random() * maxPen) + 1
+                }
+                
 
                 let res = {
-                    reward: Math.floor((randConst + extra) * importance),
+                    reward: Math.floor((randConst) * importance + extra - penalty),
                     score: importance
                 }
                 if (randConst === 0) res.reward = 0
+                
 
                 return res
             }
 
-
             const {reward, score} = getActivityReward(task)
+
             const newActivity = {
                 id: Date.now(),
                 timestamp: Date.now(),
