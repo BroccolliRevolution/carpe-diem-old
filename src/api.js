@@ -247,6 +247,11 @@ const api = () => {
             reward,
             score
         }
+
+
+        console.log('heeej', performance)
+        
+
         db.collection('dailyPerformances').doc(id).set(performance, { merge: true })
     }
 

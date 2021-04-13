@@ -62,9 +62,9 @@ function Home({ Api }) {
 
     const updateDailyPerformance = (updateFn) => {
         const update = (perf) => {
-            setTodaysReward(perf?.reward)
-            setTodaysReward(perf?.score)
-            setTodaysActivitiesCount(perf?.activitiesCount)
+            setTodaysReward(_ => perf?.reward || 0)
+            setTodaysScore(_ => perf?.score || 0)
+            setTodaysActivitiesCount(_ => perf?.activitiesCount || 0)
         }
         updateFn(update)
     }
@@ -118,8 +118,7 @@ function Home({ Api }) {
                 {showEditOrder && <button onClick={e => Api.changeOrder(task, -1)}>🔽</button>}
                 <button onClick={async e => {
                     const { reward, score } = await Api.checkActivity(id, tasks) || 0
-                    const todaysrew = todaysReward || 0
-                    Api.updateDailyPerformance(todaysrew + reward, score, activities.length + 1)
+                    Api.updateDailyPerformance(todaysReward + reward, todaysScore + score, activities.length + 1)
                 }} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
                 <span className="task-title" onClick={e => markTask(task)}>
                     {title || id}  {marked.includes(id) && '🥦'}{showEditOrder && (' - ' + task.order)}
@@ -174,7 +173,7 @@ function Home({ Api }) {
                 <div className="activity-text-section">
                     <button className="grade-btn repeat-btn" onClick={async () => {
                         const { reward, score } = await Api.checkActivity(task, tasks)
-                        Api.updateDailyPerformance(todaysReward + reward, score, activities.length)
+                        Api.updateDailyPerformance(todaysReward + reward, todaysScore + score, activities.length)
                     }
                     }>
                         <BsArrowRepeat style={{ width: '20px', height: '20px' }} />
@@ -270,6 +269,7 @@ function Home({ Api }) {
                     <div className="reward">
                     Today's reward: <span className="todays-reward">{todaysReward} </span>,- ({todaysActivitiesCount} activities) 
                         <BsTrophy style={{ color: '#F0E68C', width: '40px', height: '40px' }}></BsTrophy>
+                        score: {todaysScore}
                         <button className="excellence-button" onClick={() => {
                             const newExcellenceReward = getRandReward()
                             const newReward = todaysReward + newExcellenceReward
