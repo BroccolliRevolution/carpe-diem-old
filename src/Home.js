@@ -275,7 +275,7 @@ function Home({ Api }) {
                             const newReward = todaysReward + newExcellenceReward
                             setExcellenceReward(newExcellenceReward)
                             setTimeout(_ => setExcellenceReward(0), 4000)
-                            Api.updateDailyPerformance(newReward, activities.length)
+                            Api.updateDailyPerformance(newReward, todaysScore, activities.length)
                         }}>EXCELLENCE</button> {excellenceReward ? '+' : ''} {excellenceReward || ''}
                     </div>
                     <ol className="loglist">
