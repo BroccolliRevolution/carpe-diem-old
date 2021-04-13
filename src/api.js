@@ -40,6 +40,7 @@ const api = () => {
                         partOfDay: doc.data().partOfDay,
                         greade: doc.data().grade,
                         reward: doc.data().reward,
+                        score: doc.data().score,
                         datetime: datetimeStr,
                         project: doc.data().project,
                     })
@@ -258,10 +259,6 @@ const api = () => {
             reward,
             score
         }
-
-
-        console.log('heeej', performance)
-        
 
         db.collection('dailyPerformances').doc(id).set(performance, { merge: true })
     }

@@ -166,7 +166,7 @@ function Home({ Api }) {
     }
     
 
-    const listActivities = activities.map(({ task, id, timestamp, datetime, grade, reward, project }, i) => {
+    const listActivities = activities.map(({ task, id, timestamp, datetime, grade, reward, score, project }, i) => {
         return (
             <li key={id} className="activity-item">
 
@@ -187,9 +187,12 @@ function Home({ Api }) {
                     <button className="grade-btn" disabled={grade == 200} onClick={() => Api.updateGrade(id, 200)}>ok</button>
                     <button className="grade-btn" disabled={grade == 300} onClick={() => Api.updateGrade(id, 300)}>great</button>
                     {timeSincePreviousActivityByIndex(timestamp, i)}
-                    <button className="grade-btn" onClick={() => Api.deleteActivity(id)}>x</button>
+                    <button className="grade-btn" onClick={() => {
+                        Api.deleteActivity(id)
+                        Api.updateDailyPerformance(todaysReward - reward, todaysScore - score, activities.length)
+                    }}>x</button>
 
-         ----->{reward}
+         ----->{reward}/{score}
                     {/* .... {project} */}
                 </div>
 
