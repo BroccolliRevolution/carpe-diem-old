@@ -122,7 +122,7 @@ function Home({ Api }) {
                     const { reward, score } = await Api.checkActivity(id, tasks) || 0
                     Api.updateDailyPerformance(todaysReward + reward, todaysScore + score, activities.length + 1)
                 }}
-                    className={`btn-main ${excellenceAnimation ? 'animate__animated animate__rubberBand' : ''}`}
+                    className="btn-main"
                     style={getColorByCountDone(task)}>SAVE</button>
                 <span className="task-title" onClick={e => markTask(task)}>
                     {title || id}  {marked.includes(id) && '🥦'}{showEditOrder && (' - ' + task.order)}
