@@ -3,6 +3,7 @@ import './App.css';
 import { BsArrowRepeat, BsTrophy } from 'react-icons/bs';
 import TimeSince from './TimeSince';
 
+import 'animate.css'
 
 function Home({ Api }) {
 
@@ -22,6 +23,7 @@ function Home({ Api }) {
     const [todaysActivitiesCount, setTodaysActivitiesCount] = useState(0);
     const [dateOffset, setDateOffset] = useState(0);
     const [excellenceReward, setExcellenceReward] = useState(0);
+    const [excellenceAnimation, setExcellenceAnimation] = useState(false);
 
 
     const [dailiesType, setDailiesType] = useState('All');
@@ -119,7 +121,9 @@ function Home({ Api }) {
                 <button onClick={async e => {
                     const { reward, score } = await Api.checkActivity(id, tasks) || 0
                     Api.updateDailyPerformance(todaysReward + reward, todaysScore + score, activities.length + 1)
-                }} className="btn-main" style={getColorByCountDone(task)}>SAVE</button>
+                }}
+                    className={`btn-main ${excellenceAnimation ? 'animate__animated animate__rubberBand' : ''}`}
+                    style={getColorByCountDone(task)}>SAVE</button>
                 <span className="task-title" onClick={e => markTask(task)}>
                     {title || id}  {marked.includes(id) && '🥦'}{showEditOrder && (' - ' + task.order)}
                 </span>
@@ -182,10 +186,9 @@ function Home({ Api }) {
 
     const showTime = (datetime) => datetime.split(' => ')[1]
 
-
     const listActivities = activities.map(({ task, id, timestamp, datetime, grade, reward, score, project }, i) => {
         return (
-            <li key={id} className="activity-item">
+            <li key={id} className={`activity-item ${i === 0 ? 'animate__animated animate__fadeInDown' : ''}`}>
 
                 <div className="activity-main-info-section">
                     <div className="first-info-wrapper">
@@ -197,8 +200,8 @@ function Home({ Api }) {
                             }>
                                 <BsArrowRepeat style={{ width: '20px', height: '20px' }} />
                             </button>
-                            <div class="tooltip">{task}
-                                <span class="tooltiptext">{showTime(datetime)}</span>
+                            <div className="tooltip">{task}
+                                <span className="tooltiptext">{showTime(datetime)}</span>
                             </div>
                         </div>
                         <div className="task-date">{showDate(i)}</div>
@@ -302,17 +305,26 @@ function Home({ Api }) {
                     <div className="time-since-wrapper">
                         <TimeSince activities={activities} />
                     </div>
+
+
+
                     <div className="reward">
                         Today's reward: <span className="todays-reward">{todaysReward} </span>,- ({todaysActivitiesCount} activities)
                         <BsTrophy style={{ color: '#F0E68C', width: '40px', height: '40px' }}></BsTrophy>
                         score: {todaysScore}
-                        <button className="excellence-button" onClick={() => {
-                            const newExcellenceReward = getRandReward()
-                            const newReward = todaysReward + newExcellenceReward
-                            setExcellenceReward(newExcellenceReward)
-                            setTimeout(_ => setExcellenceReward(0), 4000)
-                            Api.updateDailyPerformance(newReward, todaysScore, activities.length)
-                        }}>EXCELLENCE</button> {excellenceReward ? '+' : ''} {excellenceReward || ''}
+
+                        <button className={`excellence-button ${excellenceAnimation ? 'animate__animated animate__rubberBand' : ''}`}
+                            onClick={() => {
+                                setExcellenceAnimation(true)
+                                setTimeout(() => {
+                                    setExcellenceAnimation(() => false)
+                                }, 2000);
+                                const newExcellenceReward = getRandReward()
+                                const newReward = todaysReward + newExcellenceReward
+                                setExcellenceReward(newExcellenceReward)
+                                setTimeout(_ => setExcellenceReward(0), 4000)
+                                Api.updateDailyPerformance(newReward, todaysScore, activities.length)
+                            }}>EXCELLENCE</button> {excellenceReward ? '+' : ''} {excellenceReward || ''}
                     </div>
                     <ol className="loglist">
                         {listActivities}
