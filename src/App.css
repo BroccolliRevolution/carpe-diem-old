@@ -182,7 +182,9 @@
   cursor: pointer;
 }
 
-
+.btn-refresh {
+  height: 40px;
+}
 
 
 /* Tooltip container */

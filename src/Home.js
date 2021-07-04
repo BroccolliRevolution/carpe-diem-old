@@ -281,8 +281,12 @@ function Home({ Api }) {
                     <h3 className="main-sections-header">
                         Dailies <button onClick={e => setDailiesType(() => dailiesType === 'Left' ? 'All' : 'Left')}>{dailiesType}</button>
                         {getDailiesByType().length === 0 && <div className="all-done">
-                            <div className="all-done-text">ALL DONE for today!!!</div>
-                            <span>✔️✔️✔️</span></div>}
+                            <div className="all-done-text">
+                                <a href="/">ALL DONE for today!!!</a>
+                            </div>
+                                <span>✔️✔️✔️</span>
+                                <button className="btn-refresh btn-main" onClick={e=>window.location.reload(false)}>REFRESH</button>    
+                            </div>}
                     </h3>
 
                     <ol className="dailies">
