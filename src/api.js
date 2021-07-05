@@ -251,15 +251,34 @@ const api = () => {
             });
     }
 
-    const updateDailyPerformance = (reward, score, activitiesCount) => {
+    const updateDailyPerformance = async (reward, score, activitiesCount, isStreakUpdated = false) => {
         const id = new Date(Date.now()).toDateString()
+        let streak = 0
+        let previousDayStreak = 0
+
+        const today = new Date(Date.now())
+        const yesterdayDatetime = new Date(today)
+
+        yesterdayDatetime.setDate(yesterdayDatetime.getDate() - 1)
+        const yesterday = yesterdayDatetime.toDateString()
+
+        const yesterdayData = await db.collection("dailyPerformances").doc(yesterday).get()
+        const yesterdayPerf = { id: yesterdayData.id, ...yesterdayData.data() }
+
+        if (isStreakUpdated) {
+            previousDayStreak = yesterdayPerf?.streak || 0
+            streak = previousDayStreak + 1
+        }
+
         const performance = {
             date: new Date(Date.now()),
             activitiesCount,
             reward,
-            score
+            score,
+            streak,
+            previousDayStreak: yesterdayPerf?.streak || 0
         }
-
+        
         db.collection('dailyPerformances').doc(id).set(performance, { merge: true })
     }
 
