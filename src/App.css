@@ -184,6 +184,11 @@
 
 .btn-refresh {
   height: 40px;
+  width: 80px;
+}
+
+.streak {
+  font-size: 20px;
 }
 
 

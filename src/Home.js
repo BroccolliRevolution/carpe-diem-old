@@ -21,6 +21,7 @@ function Home({ Api }) {
     const [todaysReward, setTodaysReward] = useState(0);
     const [todaysScore, setTodaysScore] = useState(0);
     const [todaysActivitiesCount, setTodaysActivitiesCount] = useState(0);
+    const [streak, setStreak] = useState(0);
     const [dateOffset, setDateOffset] = useState(0);
     const [excellenceReward, setExcellenceReward] = useState(0);
     const [excellenceAnimation, setExcellenceAnimation] = useState(false);
@@ -67,6 +68,10 @@ function Home({ Api }) {
             setTodaysReward(_ => perf?.reward || 0)
             setTodaysScore(_ => perf?.score || 0)
             setTodaysActivitiesCount(_ => perf?.activitiesCount || 0)
+            setStreak(_ => {
+                if (perf?.streak > 0) return perf?.streak
+                return perf?.previousDayStreak
+            })
         }
         updateFn(update)
     }
@@ -120,7 +125,12 @@ function Home({ Api }) {
                 {showEditOrder && <button onClick={e => Api.changeOrder(task, -1)}>🔽</button>}
                 <button onClick={async e => {
                     const { reward, score } = await Api.checkActivity(id, tasks) || 0
-                    Api.updateDailyPerformance(todaysReward + reward, todaysScore + score, activities.length + 1)
+                    
+                    console.log(getDailiesByType().length)
+                    
+                    
+                    const isStreakUpdated = getDailiesByType().length === 1
+                    Api.updateDailyPerformance(todaysReward + reward, todaysScore + score, activities.length + 1, isStreakUpdated)
                 }}
                     className="btn-main"
                     style={getColorByCountDone(task)}>SAVE</button>
@@ -255,6 +265,29 @@ function Home({ Api }) {
         return randConst * importance
     }
 
+    const getStreakFlames = () => {
+        if (streak < 5) {
+            return '🔥'
+        }
+        if (streak < 10) {
+            return '🔥🔥'
+        }
+        if (streak < 20) {
+            return '🔥🔥🔥'
+        }
+        if (streak < 30) {
+            return '🔥🔥🔥🔥'
+        }
+        if (streak < 50) {
+            return '🔥🔥🔥🔥🔥🔥'
+        }
+        if (streak < 50) {
+            return '🔥🔥🔥🔥🔥🔥🔥🔥'
+        }
+
+        return ''
+    }
+
     return (
         <div className="super-wrapper" tabIndex="0">
             <button className="reset-btn" onClick={e => onReset()}>Reset</button>
@@ -310,8 +343,6 @@ function Home({ Api }) {
                         <TimeSince activities={activities} />
                     </div>
 
-
-
                     <div className="reward">
                         Today's reward: <span className="todays-reward">{todaysReward} </span>,- ({todaysActivitiesCount} activities)
                         <BsTrophy style={{ color: '#F0E68C', width: '40px', height: '40px' }}></BsTrophy>
@@ -329,6 +360,11 @@ function Home({ Api }) {
                                 setTimeout(_ => setExcellenceReward(0), 4000)
                                 Api.updateDailyPerformance(newReward, todaysScore, activities.length)
                             }}>EXCELLENCE</button> {excellenceReward ? '+' : ''} {excellenceReward || ''}
+                        <span className="streak">Streak: {streak} {getStreakFlames()} </span>
+                        {<button title="Streak Freeze!!!"
+                            onClick={() => {
+                                Api.updateDailyPerformance(todaysReward, todaysScore, activities.length, true)
+                            }}>❄️</button>}
                     </div>
                     <ol className="loglist">
                         {listActivities}

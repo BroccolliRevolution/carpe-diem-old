@@ -78,7 +78,6 @@ const api = () => {
 
 
     const getAuth = () => {
-
         return new Promise(resolve => {
             firebase.auth().onAuthStateChanged(function (user) {
                 window.user = user; // user is undefined if no user signed in
@@ -94,7 +93,7 @@ const api = () => {
 
                 }
 
-                resolve(true)
+                resolve(false)
             });
         })
     }
@@ -228,6 +227,8 @@ const api = () => {
     }
 
     const addGoal = goal => {
+        console.log('UUUUUUUUUUU' , goal)
+        
         db.collection("goals").add(goal)
             .then(function (docRef) {
                 console.log("Document written with ID: ", docRef.id)
@@ -253,17 +254,23 @@ const api = () => {
 
     const updateDailyPerformance = async (reward, score, activitiesCount, isStreakUpdated = false) => {
         const id = new Date(Date.now()).toDateString()
-        let streak = 0
         let previousDayStreak = 0
-
+        
         const today = new Date(Date.now())
         const yesterdayDatetime = new Date(today)
-
+        
         yesterdayDatetime.setDate(yesterdayDatetime.getDate() - 1)
         const yesterday = yesterdayDatetime.toDateString()
 
         const yesterdayData = await db.collection("dailyPerformances").doc(yesterday).get()
         const yesterdayPerf = { id: yesterdayData.id, ...yesterdayData.data() }
+
+        console.log(yesterdayPerf)
+        
+        const todaysDate = new Date(Date.now()).toDateString()
+        const dailyPerf = await db.collection("dailyPerformances").doc(todaysDate).get()
+        let streak = dailyPerf.data()?.streak || 0
+        
 
         if (isStreakUpdated) {
             previousDayStreak = yesterdayPerf?.streak || 0
