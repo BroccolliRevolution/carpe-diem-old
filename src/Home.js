@@ -363,7 +363,12 @@ function Home({ Api }) {
                         <span className="streak">Streak: {streak} {getStreakFlames()} </span>
                         {<button title="Streak Freeze!!!"
                             onClick={() => {
-                                Api.updateDailyPerformance(todaysReward, todaysScore, activities.length, true)
+                                if (window.confirm('Really use STREAK FREEZE?'))
+                                {
+                                    Api.updateDailyPerformance(todaysReward, todaysScore, activities.length, true)
+                                    alert('yippee ki-yay, yu LAZY BASTERD!!!')
+                                }
+                                
                             }}>❄️</button>}
                     </div>
                     <ol className="loglist">
