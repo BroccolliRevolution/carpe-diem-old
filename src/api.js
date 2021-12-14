@@ -38,7 +38,7 @@ const api = () => {
                         task: doc.data().task,
                         timestamp: doc.data().timestamp,
                         partOfDay: doc.data().partOfDay,
-                        greade: doc.data().grade,
+                        grade: doc.data().grade,
                         reward: doc.data().reward,
                         score: doc.data().score,
                         datetime: datetimeStr,
@@ -208,7 +208,7 @@ const api = () => {
     }
 
     const subscribeGoals = fn => {
-        db.collection("goals").orderBy("date", "asc")//.where("active", "==", true)
+        db.collection("goals")//.where("active", "==", true)
             .onSnapshot(function (querySnapshot) {
                 var goals = []
 
@@ -216,8 +216,6 @@ const api = () => {
                 querySnapshot.forEach(doc =>
                     goals.push({
                         id: doc.id,
-                        date: doc.data().date,
-                        mark: doc.data().mark,
                         title: doc.data().title,
                         parent: doc.data().parent,
                     })
@@ -225,31 +223,51 @@ const api = () => {
                 fn(goals)
             })
     }
-
+    
     const addGoal = goal => {
-        console.log('UUUUUUUUUUU' , goal)
-        
         db.collection("goals").add(goal)
-            .then(function (docRef) {
-                console.log("Document written with ID: ", docRef.id)
-            })
-            .catch(function (error) {
-                console.error("Error adding document: ", error)
-            });
+        .then(function (docRef) {
+            console.log("Document written with ID: ", docRef.id)
+        })
+        .catch(function (error) {
+            console.error("Error adding document: ", error)
+        });
     }
 
+    const addGoalReview = goalReview => {
+        db.collection("goalsReviews").doc(goalReview.id).set(goalReview)
+    }
+    
+    const subscribeGoalsReviews = fn => {
+        const dateNow = new Date(Date.now()).toDateString()
+        
+        db.collection("goalsReviews").orderBy("date", 'desc')//.where("dateTime", ">=", dateNow)
+            .onSnapshot(function (querySnapshot) {
+                var goalReviews = []
 
-    const updateGoalMark = (goalId, mark) => {
-        var activityRef = db.collection('goals').doc(goalId);
-        activityRef
-            .update({ mark })
-            .then(function () {
-                console.log("Document successfully updated!");
+                // DEFINE tasks properties
+                querySnapshot.forEach(doc =>
+                    goalReviews.push({
+                        id: doc.id,
+                        date: doc.data().date,
+                        mark: doc.data().mark,
+                        goal: doc.data().goal,
+                    })
+                )
+
+                fn(goalReviews)
             })
-            .catch(function (error) {
-                // The document probably doesn't exist.
-                console.error("Error updating document: ", error);
-            });
+    }
+
+    const updateGoalReviewMark = (goalReview, mark) => {
+        const dateNow = new Date(Date.now()).toDateString()
+
+        db.collection("goalsReviews").doc(goalReview.id).set({
+            mark,
+            goal: goalReview.goal,
+            date: dateNow,
+            dateTime: new Date(Date.now())
+        })
     }
 
     const updateDailyPerformance = async (reward, score, activitiesCount, isStreakUpdated = false) => {
@@ -290,7 +308,7 @@ const api = () => {
     }
 
     const getAllGoals = async () => {
-        const snapshot = await db.collection('goals').orderBy("date", "asc").get()
+        const snapshot = await db.collection('goals').get()
         return snapshot.docs.map(doc => doc.data());
     }
 
@@ -306,18 +324,21 @@ const api = () => {
     return {
         subscribeActivities,
         subscribeTasks,
-        getAuth: getAuth,
+        getAuth,
         checkActivity,
         changeOrder,
         updateGrade,
         deleteActivity,
         saveTask,
-        subscribeGoals,
-        addGoal,
-        updateGoalMark,
         updateDailyPerformance,
         getDailyPerformance,
-        getAllGoals
+        addGoal,
+        addGoalReview,
+        getAllGoals,
+        subscribeGoals,
+        subscribeGoalsReviews,
+        updateGoalReviewMark,
+
     }
 }
 
