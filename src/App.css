@@ -91,6 +91,10 @@
   justify-content: space-between;
 }
 
+.grade-given {
+  background-color: rgb(168 235 170 / 12%);
+}
+
 .activity-btns-section {
   align-items: center;
   flex: 1 1 30%;

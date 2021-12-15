@@ -200,7 +200,7 @@ function Home({ Api }) {
         return (
             <li key={id} className={`activity-item ${i === 0 ? 'animate__animated animate__fadeInDown' : ''}`}>
 
-                <div className="activity-main-info-section">
+                <div className={`activity-main-info-section ${grade ? 'grade-given' : ''}`}>
                     <div className="first-info-wrapper">
                         <div className="task-main">
                             <button className="grade-btn repeat-btn" onClick={async () => {
