@@ -98,7 +98,7 @@ if len(sys.argv) == 2 and sys.argv[1] == '-h':
     print("without any flag - backups all")
 
 if len(sys.argv) == 1:
-    print("Backups All (for specific - see help (flag -h)")
+    print("Backups All, for specific - see help (flag -h)")
     backup_goals()
     backup_dailyPerformances()
     backup_tasks()
