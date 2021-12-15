@@ -2,19 +2,17 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 import json
+import sys
+ 
 
 data = {}
 data['tasks'] = []
-
 
 # Use a service account
 cred = credentials.Certificate('/home/peto/Code/carpe-diem/src/config/python-conf.json')
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
-
-
-
 
 def backup_tasks():
     users_ref = db.collection(u'tasks')
@@ -91,8 +89,37 @@ def backup_goals():
         json.dump(data, outfile)
         
 
+if len(sys.argv) == 2 and sys.argv[1] == '-h':
+    print("Command for backup carpe-diem data")
+    print("-a ... Activities")
+    print("-t ... Tasks")
+    print("-d ... Daily Performances")
+    print("-g ... Goals")
+    print("without any flag - backups all")
 
-backup_goals()
-backup_dailyPerformances()
-backup_tasks()
-backup_activities()
+if len(sys.argv) == 1:
+    print("Backups All (for specific - see help (flag -h)")
+    backup_goals()
+    backup_dailyPerformances()
+    backup_tasks()
+    backup_activities()
+
+if len(sys.argv) == 2 and sys.argv[1] == '-a':
+    print("Getting Activities...")
+    backup_activities()    
+    print("Done!")
+
+if len(sys.argv) == 2 and sys.argv[1] == '-d':
+    print("Getting Daily Performances...")
+    backup_dailyPerformances()    
+    print("Done!")
+
+if len(sys.argv) == 2 and sys.argv[1] == '-g':
+    print("Getting Goals...")
+    backup_goals()    
+    print("Done!")
+
+if len(sys.argv) == 2 and sys.argv[1] == '-t':
+    print("Getting Tasks...")
+    backup_tasks()    
+    print("Done!")
