@@ -104,11 +104,17 @@ function Goals({ Api }) {
             return g.date === lastReviewsDate
         })
 
-        // TODO what with new reviews, will this be problem?
-        console.log(previousReviews)
-        const newReviews = goalsReviews.map(g => {
-            previousReviews.find(prev => prev.goal === goal)
+        const alltodaysDateReviews = goalsReviews.filter(g => {
+            return g.date === todaysDate
         })
+
+        // TODO what with new reviews, will this be problem?
+        
+        alltodaysDateReviews.forEach(g => {
+            const prevRew = previousReviews.find(prev => prev.goal === g.goal)
+            const prevMark = prevRew?.mark || g.mark
+            Api.updateGoalReviewMark(g, prevMark)
+        })        
 
     }
 
@@ -183,9 +189,9 @@ function Goals({ Api }) {
                 <button onClick={e => addNewGoal()} className="btn-main">add</button>
             </div>}
             <button onClick={e => setAddMode(old => !old)} className="btn-main">{addMode ? 'Hide' : 'Add New Goal'}</button>
-            <ul>
+            <ol>
                 {goalsList}
-            </ul>
+            </ol>
 
             {/* <button onClick={e => addBulk()} className="btn-main">TEST</button> */}
             <button onClick={e => addNewGoalRewiew()} className="btn-main">+ NEW REVIEW</button>

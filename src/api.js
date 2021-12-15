@@ -260,12 +260,10 @@ const api = () => {
     }
 
     const updateGoalReviewMark = (goalReview, mark) => {
-        const dateNow = new Date(Date.now()).toDateString()
-
         db.collection("goalsReviews").doc(goalReview.id).set({
             mark,
             goal: goalReview.goal,
-            date: dateNow,
+            date: goalReview.date,
             dateTime: new Date(Date.now())
         })
     }
