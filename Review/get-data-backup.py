@@ -9,7 +9,7 @@ data = {}
 data['tasks'] = []
 
 # Use a service account
-cred = credentials.Certificate('/home/peto/Code/carpe-diem/src/config/python-conf.json')
+cred = credentials.Certificate('../src/config/python-conf.json')
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
@@ -24,7 +24,7 @@ def backup_tasks():
         task['id'] = doc.id
         data['tasks'].append(task)
 
-    with open('/home/peto/Code/carpe-diem/Review/data/backup/tasks.json', 'w') as outfile:
+    with open('./data/backup/tasks.json', 'w') as outfile:
         json.dump(data, outfile)
 
 
@@ -48,7 +48,7 @@ def backup_activities():
         tosave['date'] = getDateFormated(tosave['date'])
         data['activities'].append(tosave)
 
-    with open('/home/peto/Code/carpe-diem/Review/data/backup/activities.json', 'w') as outfile:
+    with open('./data/backup/activities.json', 'w') as outfile:
         json.dump(data, outfile)
 
 
@@ -66,7 +66,7 @@ def backup_dailyPerformances():
         tosave['date'] = getDateFormated(tosave['date'])
         data['dailyPerformances'].append(tosave)
 
-    with open('/home/peto/Code/carpe-diem/Review/data/backup/dailyPerformances.json', 'w') as outfile:
+    with open('./data/backup/dailyPerformances.json', 'w') as outfile:
         json.dump(data, outfile)
 
 def backup_goals():
@@ -85,7 +85,7 @@ def backup_goals():
         tosave.pop('datetime', None)
         data['goals'].append(tosave)
 
-    with open('/home/peto/Code/carpe-diem/Review/data/backup/goals.json', 'w') as outfile:
+    with open('./data/backup/goals.json', 'w') as outfile:
         json.dump(data, outfile)
         
 
