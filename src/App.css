@@ -53,6 +53,10 @@
   margin: 5px;
 }
 
+.grade-btn:hover {
+  cursor: pointer;
+}
+
 .repeat-btn {
   background: none;
   border: none;
