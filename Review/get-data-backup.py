@@ -93,6 +93,6 @@ def backup_goals():
 
 
 backup_goals()
-# backup_dailyPerformances()
-# backup_tasks()
-# backup_activities()
+backup_dailyPerformances()
+backup_tasks()
+backup_activities()
