@@ -74,15 +74,13 @@ def backup_goals():
     data['goals'] = []
 
     users_ref = db.collection(u'goals').order_by(
-        u'date', direction=firestore.Query.DESCENDING)
+        u'order', direction=firestore.Query.DESCENDING)
     docs = users_ref.stream()
 
     for doc in docs:
         tosave = doc.to_dict()
         tosave['id'] = doc.id
-        #print(tosave['datetime'])
-        #tosave['datetime'] = getDateFormated(tosave['datetime'])
-        tosave.pop('datetime', None)
+        tosave.pop('dateTimeCreated', None)
         data['goals'].append(tosave)
 
     with open('./data/backup/goals.json', 'w') as outfile:
