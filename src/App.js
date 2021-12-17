@@ -53,7 +53,7 @@ function App() {
                 <Link to="/tasks-edit">Task Edit</Link>
               </li>
               <li>
-                <Link to="/goals">Goals</Link>
+                <Link to="/goals">Goals Reviews</Link>
               </li>
             </ul>
           </nav>

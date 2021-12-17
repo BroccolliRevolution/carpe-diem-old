@@ -226,3 +226,17 @@
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
+
+.lists-wrapper {
+  display: flex;
+}
+
+.reviews-list {
+  flex: 1 1 100px;
+}
+
+.goals-list {
+  flex: 1 1 100px;
+}
+
+

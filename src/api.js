@@ -208,15 +208,16 @@ const api = () => {
     }
 
     const subscribeGoals = fn => {
-        db.collection("goals")//.where("active", "==", true)
+        db.collection("goals").orderBy("order", 'desc')//.where("active", "==", true) //.where("active", "==", true)
             .onSnapshot(function (querySnapshot) {
                 var goals = []
 
-                // DEFINE tasks properties
                 querySnapshot.forEach(doc =>
                     goals.push({
                         id: doc.id,
                         title: doc.data().title,
+                        active: doc.data().active,
+                        order: doc.data().order,
                         parent: doc.data().parent,
                     })
                 )
@@ -234,14 +235,35 @@ const api = () => {
         });
     }
 
-    const addGoalReview = goalReview => {
-        db.collection("goalsReviews").doc(goalReview.id).set(goalReview)
+    const deleteGoal = goal => {
+        db.collection('goals').doc(goal.id).delete().then(() => {
+            console.log("Document successfully deleted!");
+        }).catch((error) => {
+            console.error("Error removing document: ", error);
+        });
+    }
+
+    const addGoalReview = async (goalReview) => {
+        return db.collection("goalsReviews").doc(goalReview.id).set(goalReview)
+    }
+
+    const updateGoal = (goal) => {
+        var goalRef = db.collection('goals').doc(goal.id);
+        goalRef
+            .update({ ...goal })
+            .then(function () {
+                console.log("Document successfully updated!");
+            })
+            .catch(function (error) {
+                // The document probably doesn't exist.
+                console.error("Error updating document: ", error);
+            });
     }
     
     const subscribeGoalsReviews = fn => {
         const dateNow = new Date(Date.now()).toDateString()
         
-        db.collection("goalsReviews").orderBy("date", 'desc')//.where("dateTime", ">=", dateNow)
+        db.collection("goalsReviews").orderBy("dateTime", 'desc').orderBy("order", 'desc')//.where("dateTime", ">=", dateNow)
             .onSnapshot(function (querySnapshot) {
                 var goalReviews = []
 
@@ -249,23 +271,27 @@ const api = () => {
                 querySnapshot.forEach(doc =>
                     goalReviews.push({
                         id: doc.id,
+                        order: doc.data().order,
                         date: doc.data().date,
                         mark: doc.data().mark,
                         goal: doc.data().goal,
                     })
                 )
-
                 fn(goalReviews)
             })
     }
 
     const updateGoalReviewMark = (goalReview, mark) => {
-        db.collection("goalsReviews").doc(goalReview.id).set({
-            mark,
-            goal: goalReview.goal,
-            date: goalReview.date,
-            dateTime: new Date(Date.now())
-        })
+        var goalReviewRef = db.collection('goalsReviews').doc(goalReview.id);
+        goalReviewRef
+            .update({ mark })
+            .then(function () {
+                console.log("Document successfully updated!");
+            })
+            .catch(function (error) {
+                // The document probably doesn't exist.
+                console.error("Error updating document: ", error);
+            });
     }
 
     const updateDailyPerformance = async (reward, score, activitiesCount, isStreakUpdated = false) => {
@@ -336,7 +362,8 @@ const api = () => {
         subscribeGoals,
         subscribeGoalsReviews,
         updateGoalReviewMark,
-
+        updateGoal,
+        deleteGoal,
     }
 }
 
