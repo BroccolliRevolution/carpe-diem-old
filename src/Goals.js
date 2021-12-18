@@ -5,11 +5,21 @@ function Goals({ Api }) {
     const [goals, setGoals] = useState([]);
     const [activeGoals, setActiveGoals] = useState([]);
     const [goalsReviews, setGoalsReviews] = useState([]);
-    const [prevGoals, setPrevGoals] = useState([]);
+    const [previousReviews, setPreviousReviews] = useState([]);
     const [titleOfNew, setTitleOfNew] = useState('');
     const [parentOfNew, setParentOfNew] = useState('');
     const [orderOfNew, setOrderOfNew] = useState(0);
     const [addMode, setAddMode] = useState(false);
+
+    useEffect(() => {
+        const lastDate = goalsReviews[0]?.date
+
+        const allPrevReviews = goalsReviews.filter(review => review.date !== lastDate)
+        const prevReviewDate = allPrevReviews[0]?.date
+        const prevReviews = goalsReviews.filter(review => review.date === prevReviewDate)
+
+        setPreviousReviews(prevReviews)
+    }, [goalsReviews])
 
     useEffect(() => {
         Api.subscribeGoalsReviews(goalsReviewsToUpdate => {
@@ -37,7 +47,7 @@ function Goals({ Api }) {
                 if (go.parent == undefined) go.parent = ''
                 return go
             }))
-            setPrevGoals(_ => prev)
+
         })
     }, [])
 
@@ -59,14 +69,35 @@ function Goals({ Api }) {
         setOrderOfNew(0)
     }
 
+    const getPrevReview = review => previousReviews.find(r => r.goal == review?.goal)
+    const getImprovementStyling = (newReview, prevReview) => {
+        if (!newReview || !prevReview) return '#dad53052'
+        const difference = newReview?.mark - prevReview?.mark
+        let res
+
+        if (difference === 0) return '#dad53052'
+
+        if (difference >= 1) res = '#2f932f33'
+        if (difference > 3 && difference < 6) res = '#3ec71be3'
+        if (difference >= 6) res = 'gold'
+
+
+        if (difference <= -1) res = '#ff000047'
+        if (difference <= -3) res = '#ff6a00db'
+        if (difference <= -5) res = '#ff1800c9'
+
+        return res
+    }
+
     const reviewsList = goalsReviews
-        .map(goalReview =>
-        (<li key={goalReview.id}>
+        .map(review =>
+        (<li key={review.id}>
+            {getPrevReview(review)?.mark}
             <input min="0" max="10"
-                style={{ width: '30px' }}
+                style={{ width: '30px', backgroundColor: getImprovementStyling(review, getPrevReview(review)) }}
                 type="number"
-                value={goalReview.mark} onChange={e => Api.updateGoalReviewMark(goalReview, e.target.value)} />
-            ===  {goalReview.goal} ....... {goalReview.date}
+                value={review.mark} onChange={e => Api.updateGoalReviewMark(review, e.target.value)} />
+            ===  {review.goal} ....... {review.date}
         </li>))
 
     const goalsList = goals
@@ -105,12 +136,6 @@ function Goals({ Api }) {
             {goal.title}
             {goal.active}
             {goal.parent}
-            {goal.order}
-            {/* <input min="0" max="10"
-                style={{ width: '30px' }}
-                type="number"
-                value={goalReview.mark} onChange={e => Api.updateGoalReviewMark(goalReview, e.target.value)} />
-            ===  {goalReview.goal} ....... {goalReview.date} */}
         </li>))
 
     const addNewGoalRewiew = async () => {
@@ -121,7 +146,7 @@ function Goals({ Api }) {
         const today = new Date(Date.now())
         const yesterdayDatetime = new Date(today)
 
-        yesterdayDatetime.setDate(yesterdayDatetime.getDate() - 5)
+        yesterdayDatetime.setDate(yesterdayDatetime.getDate())
         const yesterday = yesterdayDatetime.toDateString()
 
         const lastReviewsDate = goalsReviews[0]?.date
