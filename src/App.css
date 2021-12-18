@@ -276,3 +276,11 @@ ul {
 .goals-screen-wrapper {
   padding: 8px
 }
+
+.tasks-lists-wrapper {
+  display: flex;
+}
+
+.tasks-lists-edit {
+  flex: 1 1 100px;
+}

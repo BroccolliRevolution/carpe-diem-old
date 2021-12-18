@@ -4,6 +4,26 @@ firebase.initializeApp(firebaseConfig)
 var db = firebase.firestore();
 
 const api = () => {
+    const getAuth = () => {
+        return new Promise(resolve => {
+            firebase.auth().onAuthStateChanged(function (user) {
+                window.user = user; // user is undefined if no user signed in
+                if (!user) {
+                    var provider = new firebase.auth.GoogleAuthProvider();
+                    provider.addScope('profile');
+                    provider.addScope('email');
+                    provider.addScope('https://www.googleapis.com/auth/plus.me');
+                    firebase.auth().signInWithPopup(provider); // Opens a popup window and returns a promise to handle errors.
+
+                } else {
+                    // TODO this change to user for real :D     
+
+                }
+
+                resolve(false)
+            });
+        })
+    }
 
     function myDateFormat(dateIn) {
         var yyyy = dateIn.getFullYear()
@@ -47,13 +67,12 @@ const api = () => {
 
                 })
                 fn(activities)
-
             })
     }
 
 
     const subscribeTasks = (fn) => {
-        db.collection("tasks").orderBy("order").where("active", "==", true)
+        db.collection("tasks").orderBy("order")//.where("active", "==", true)
             .onSnapshot(function (querySnapshot) {
                 var tasks = []
 
@@ -61,41 +80,52 @@ const api = () => {
                 querySnapshot.forEach(doc =>
                     tasks.push({
                         id: doc.id,
-                        title: doc.data().title,
                         categories: doc.data().categories,
                         order: doc.data().order,
+                        active: doc.data().active,
                         level: doc.data().level,
                         importance: doc.data().importance,
                         type: doc.data().type,
                         partOfDay: doc.data().partOfDay,
-                        project: doc.data().project,
                     })
                 )
                 fn(tasks)
             })
     }
 
-
-
-    const getAuth = () => {
-        return new Promise(resolve => {
-            firebase.auth().onAuthStateChanged(function (user) {
-                window.user = user; // user is undefined if no user signed in
-                if (!user) {
-                    var provider = new firebase.auth.GoogleAuthProvider();
-                    provider.addScope('profile');
-                    provider.addScope('email');
-                    provider.addScope('https://www.googleapis.com/auth/plus.me');
-                    firebase.auth().signInWithPopup(provider); // Opens a popup window and returns a promise to handle errors.
-
-                } else {
-                    // TODO this change to user for real :D     
-
-                }
-
-                resolve(false)
-            });
+    const saveTask = (title, type) => {
+        if (title == '' || type == '') {
+            alert('set task and type')
+            return
+        }
+        db.collection("tasks").doc(title).set({
+            active: true,
+            categories: [],
+            importance: 100,
+            isDaily: true,
+            level: 1,
+            order: 20,
+            type
         })
+    }
+
+    const updateTask = (task, order) => {
+        var taskRef = db.collection('tasks').doc(task.id)
+
+    //    // task.order = order
+    //     console.log(task, order)
+    //     return
+    console.log(task)
+
+        taskRef
+            .update({ ...task })
+            .then(function () {
+                console.log("Document successfully updated!");
+            })
+            .catch(function (error) {
+                // The document probably doesn't exist.
+                console.error("Error updating document: ", error);
+            });
     }
 
     const checkActivity = (task, tasks) => {
@@ -103,7 +133,7 @@ const api = () => {
 
             const getActivityReward = (task) => {
                 const randVar = Math.floor(Math.random() * 9) + 1
-                
+
                 let randConst = 1
                 if (randVar < 3) {
                     randConst = 0
@@ -119,25 +149,25 @@ const api = () => {
 
                 // TODO this penalty will not be random in future
                 const randVarPen = Math.floor(Math.random() * 9) + 1
-                
+
                 const maxPen = 20
                 let penalty = 0
                 if (randVarPen < 3) {
                     penalty = Math.floor(Math.random() * maxPen) + 1
                 }
-                
+
 
                 let res = {
                     reward: Math.floor((randConst) * importance + extra - penalty),
                     score: importance
                 }
                 if (randConst === 0) res.reward = 0
-                
+
 
                 return res
             }
 
-            const {reward, score} = getActivityReward(task)
+            const { reward, score } = getActivityReward(task)
 
             const newActivity = {
                 id: Date.now(),
@@ -191,22 +221,6 @@ const api = () => {
         });
     }
 
-    const saveTask = (title, type) => {
-        if (title == '' || type == '') {
-            alert('set task and type')
-            return
-        }
-        db.collection("tasks").doc(title).set({
-            active: true,
-            categories: [],
-            importance: 100,
-            isDaily: true,
-            level: 1,
-            order: 20,
-            type
-        })
-    }
-
     const subscribeGoals = fn => {
         db.collection("goals").orderBy("order", 'desc')//.where("active", "==", true) //.where("active", "==", true)
             .onSnapshot(function (querySnapshot) {
@@ -224,15 +238,15 @@ const api = () => {
                 fn(goals)
             })
     }
-    
+
     const addGoal = goal => {
         db.collection("goals").add(goal)
-        .then(function (docRef) {
-            console.log("Document written with ID: ", docRef.id)
-        })
-        .catch(function (error) {
-            console.error("Error adding document: ", error)
-        });
+            .then(function (docRef) {
+                console.log("Document written with ID: ", docRef.id)
+            })
+            .catch(function (error) {
+                console.error("Error adding document: ", error)
+            });
     }
 
     const deleteGoal = goal => {
@@ -259,10 +273,10 @@ const api = () => {
                 console.error("Error updating document: ", error);
             });
     }
-    
-    const subscribeGoalsReviews = (fn, limit= 100) => {
+
+    const subscribeGoalsReviews = (fn, limit = 100) => {
         const dateNow = new Date(Date.now()).toDateString()
-        
+
         db.collection("goalsReviews").orderBy("dateTime", 'desc').orderBy("order", 'desc').limit(limit)//.where("dateTime", ">=", dateNow)
             .onSnapshot(function (querySnapshot) {
                 var goalReviews = []
@@ -297,10 +311,10 @@ const api = () => {
     const updateDailyPerformance = async (reward, score, activitiesCount, isStreakUpdated = false) => {
         const id = new Date(Date.now()).toDateString()
         let previousDayStreak = 0
-        
+
         const today = new Date(Date.now())
         const yesterdayDatetime = new Date(today)
-        
+
         yesterdayDatetime.setDate(yesterdayDatetime.getDate() - 1)
         const yesterday = yesterdayDatetime.toDateString()
 
@@ -308,11 +322,11 @@ const api = () => {
         const yesterdayPerf = { id: yesterdayData.id, ...yesterdayData.data() }
 
         console.log(yesterdayPerf)
-        
+
         const todaysDate = new Date(Date.now()).toDateString()
         const dailyPerf = await db.collection("dailyPerformances").doc(todaysDate).get()
         let streak = dailyPerf.data()?.streak || 0
-        
+
 
         if (isStreakUpdated) {
             previousDayStreak = yesterdayPerf?.streak || 0
@@ -327,7 +341,7 @@ const api = () => {
             streak,
             previousDayStreak: yesterdayPerf?.streak || 0
         }
-        
+
         db.collection('dailyPerformances').doc(id).set(performance, { merge: true })
     }
 
@@ -354,6 +368,7 @@ const api = () => {
         updateGrade,
         deleteActivity,
         saveTask,
+        updateTask,
         updateDailyPerformance,
         getDailyPerformance,
         addGoal,

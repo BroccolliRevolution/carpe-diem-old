@@ -32,7 +32,8 @@ function Home({ Api }) {
     const onShowEditOrder = () => setShowEditOrder(!showEditOrder)
 
     const updateTasks = (updateFn) => {
-        const update = tasks => {
+        const update = allTasks => {
+            const tasks = allTasks.filter(task => task.active)
             let tasksByType = tasks.reduce((prev, curr) => {
                 if (!prev[curr.type]) prev[curr.type] = []
                 prev[curr.type] = [...prev[curr.type], curr]
