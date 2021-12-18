@@ -6,10 +6,8 @@ import TimeSince from './TimeSince';
 import 'animate.css'
 
 function Home({ Api }) {
-
     const doneColors = ['#0080001f', ' #008000a3', ' #008000c9', ' #008000']
     const notDoneColor = '#c5a7c736'
-
 
     const [marked, setMarked] = useState([]);
     const [dailies, setDailies] = useState([]);
@@ -33,7 +31,6 @@ function Home({ Api }) {
     const getDailiesByType = () => dailiesType === 'All' ? getDailies() : getTaskList(dailies, showEditOrder)
     const onShowEditOrder = () => setShowEditOrder(!showEditOrder)
 
-
     const updateTasks = (updateFn) => {
         const update = tasks => {
             let tasksByType = tasks.reduce((prev, curr) => {
@@ -51,14 +48,12 @@ function Home({ Api }) {
         }
 
         updateFn(update)
-
     }
 
     const updateActivitiesAndRewards = (updateFn) => {
         const update = (activities) => {
             setActivities(items => [...activities])
             const rewards = activities.map(activity => activity?.reward || 0)
-            //setTodaysReward(rewards.reduce((prev, curr) => prev + curr, 0))
         }
         updateFn(update, dateOffset)
     }
@@ -179,24 +174,18 @@ function Home({ Api }) {
         return `${addNullIfNeeded(hours)}:${addNullIfNeeded(minutes)}:${addNullIfNeeded(Math.floor(seconds))}`
     }
 
-
     const showDate = (i) => {
         if (i === 0) return ''
         const curr = activities[i]?.datetime.split(' => ')[0]
         const prev = activities[i - 1]?.datetime.split(' => ')[0]
 
-
-        if (curr != prev) {
-            console.log(curr, prev)
-
-            return curr
-        }
+        if (curr != prev) return curr
         return ''
     }
 
     const showTime = (datetime) => datetime.split(' => ')[1]
 
-    const listActivities = activities.map(({ task, id, timestamp, datetime, grade, reward, score, project }, i) => {
+    const listActivities = activities.map(({ task, id, timestamp, datetime, grade, reward, score }, i) => {
         return (
             <li key={id} className={`activity-item ${i === 0 ? 'animate__animated animate__fadeInDown' : ''}`}>
 
@@ -239,7 +228,6 @@ function Home({ Api }) {
                         Api.updateDailyPerformance(todaysReward - reward, todaysScore - score, activities.length)
                     }}>x</button>
 
-                    {/* .... {project} */}
                 </div>
 
             </li>

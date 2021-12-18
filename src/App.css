@@ -5,6 +5,12 @@
   outline: 0;
 }
 
+ul {
+  list-style-type: none; /* Remove bullets */
+  padding: 0; /* Remove padding */
+  margin: 0; /* Remove margins */
+}
+
 .main-sections-header {
   margin-top: 0;
   text-align: center;
@@ -232,7 +238,12 @@
 }
 
 .reviews-list {
+  padding: 20px;
   flex: 1 1 100px;
+}
+
+.reviews-date {
+  margin: 5px;
 }
 
 .goals-list {

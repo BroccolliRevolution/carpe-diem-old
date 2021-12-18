@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { FaRegSmileBeam, FaExclamationCircle, FaThumbsDown, FaRegGrinHearts } from 'react-icons/fa';
 import './App.css';
 
 function Goals({ Api }) {
+    const defaultMark = 5
+    const nextReviewsToLoadCount = 50
+
     const [goals, setGoals] = useState([]);
     const [activeGoals, setActiveGoals] = useState([]);
     const [goalsReviews, setGoalsReviews] = useState([]);
@@ -10,6 +14,7 @@ function Goals({ Api }) {
     const [parentOfNew, setParentOfNew] = useState('');
     const [orderOfNew, setOrderOfNew] = useState(0);
     const [addMode, setAddMode] = useState(false);
+    const [reviewsLimit, setReviewsLimit] = useState(nextReviewsToLoadCount);
 
     useEffect(() => {
         const lastDate = goalsReviews[0]?.date
@@ -24,8 +29,8 @@ function Goals({ Api }) {
     useEffect(() => {
         Api.subscribeGoalsReviews(goalsReviewsToUpdate => {
             setGoalsReviews(goalsReviewsToUpdate)
-        })
-    }, [])
+        }, reviewsLimit)
+    }, [reviewsLimit])
 
     useEffect(() => {
         const activeGoals = goals.filter(goal => goal.active)
@@ -33,20 +38,9 @@ function Goals({ Api }) {
     }, [goals])
 
     useEffect(() => {
-        Api.subscribeGoals(g => {
-            const first = g[0]?.date
+        Api.subscribeGoals(goals => {
 
-            var d = new Date(first);
-            d.setDate(d.getDate() - 1)
-            const nowDate = d.toDateString()
-
-            // TODO remove this when no longer needed
-            const prev = g.filter(goal => goal.date === nowDate)
-
-            setGoals(_ => g.map(go => {
-                if (go.parent == undefined) go.parent = ''
-                return go
-            }))
+            setGoals(goals)
 
         })
     }, [])
@@ -89,17 +83,37 @@ function Goals({ Api }) {
         return res
     }
 
+    const getLevelOfMarkContent = ({ mark }) => {
+        if (mark > 7) return <><FaRegSmileBeam></FaRegSmileBeam><FaRegGrinHearts></FaRegGrinHearts></>
+        if (mark < 5) return <><FaExclamationCircle style={{ color: 'red' }}></FaExclamationCircle><FaThumbsDown style={{ marginLeft: '5px' }}></FaThumbsDown></>
+    }
+
+    const showDate = (i) => {
+        if (i === 0) return ''
+        const curr = goalsReviews[i]?.date
+        const prev = goalsReviews[i - 1]?.date
+
+        if (curr != prev) return curr
+        return ''
+    }
+
     const reviewsList = goalsReviews
-        .map(review =>
-        (<li key={review.id}>
-            {getPrevReview(review)?.mark}
-            <input min="0" max="10"
-                style={{ width: '30px', backgroundColor: getImprovementStyling(review, getPrevReview(review)) }}
-                class="review-mark-input"
-                type="number"
-                value={review.mark} onChange={e => Api.updateGoalReviewMark(review, e.target.value)} />
-            = {review.goal} ....... {review.date}
-        </li>))
+        .map((review, i) =>
+        (
+            <>
+                {showDate(i) && <li className='reviews-date' key={i}>{showDate(i)}</li>}
+                <li key={review.id}>
+                    {getPrevReview(review)?.mark}
+
+                    <input min="0" max="10"
+                        style={{ width: '30px', backgroundColor: getImprovementStyling(review, getPrevReview(review)) }}
+                        class="review-mark-input"
+                        type="number"
+                        value={review.mark} onChange={e => Api.updateGoalReviewMark(review, e.target.value)} />
+                    = {getLevelOfMarkContent(review)} {review.goal}
+                </li>
+            </>
+        ))
 
     const goalsList = goals
         .map(goal =>
@@ -129,11 +143,6 @@ function Goals({ Api }) {
     const activeGoalsList = activeGoals
         .map(goal =>
         (<li key={goal.id}>
-            <input
-                type="checkbox"
-                checked={goal.active}
-                onChange={e => console.log(goal)}
-            />
             {goal.title}
             {goal.active}
             {goal.parent}
@@ -157,7 +166,7 @@ function Goals({ Api }) {
 
         for (const goal of activeGoals) {
             const prevRew = previousReviews.find(prev => prev.goal === goal.title)
-            const prevReviewMark = prevRew?.mark || 5
+            const prevReviewMark = prevRew?.mark || defaultMark
             const goalReview = {
                 id: `${yesterday} - ${goal.title}`,
                 goal: goal.title,
@@ -204,9 +213,13 @@ function Goals({ Api }) {
             <button onClick={e => setAddMode(old => !old)} className="btn-main">{addMode ? 'Hide' : 'Add New Goal'}</button>
             <div className="lists-wrapper">
                 <div className="reviews-list">
-                    <ol>
+                    <ul>
                         {reviewsList}
-                    </ol>
+                    </ul>
+                    <button onClick={e => {
+                        const newReviewsLimit = reviewsLimit + nextReviewsToLoadCount
+                        setReviewsLimit(newReviewsLimit)
+                    }}>... more</button>
                 </div>
                 <div className="goals-list">
                     <ol>

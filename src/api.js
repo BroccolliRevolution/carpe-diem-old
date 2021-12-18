@@ -260,10 +260,10 @@ const api = () => {
             });
     }
     
-    const subscribeGoalsReviews = fn => {
+    const subscribeGoalsReviews = (fn, limit= 100) => {
         const dateNow = new Date(Date.now()).toDateString()
         
-        db.collection("goalsReviews").orderBy("dateTime", 'desc').orderBy("order", 'desc')//.where("dateTime", ">=", dateNow)
+        db.collection("goalsReviews").orderBy("dateTime", 'desc').orderBy("order", 'desc').limit(limit)//.where("dateTime", ">=", dateNow)
             .onSnapshot(function (querySnapshot) {
                 var goalReviews = []
 
