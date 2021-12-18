@@ -4,7 +4,7 @@ import './App.css';
 
 function Goals({ Api }) {
     const defaultMark = 5
-    const nextReviewsToLoadCount = 50
+    const nextReviewsToLoadCount = 58
 
     const [goals, setGoals] = useState([]);
     const [activeGoals, setActiveGoals] = useState([]);
@@ -216,7 +216,7 @@ function Goals({ Api }) {
                     <ul>
                         {reviewsList}
                     </ul>
-                    <button onClick={e => {
+                    <button className='load-more-button' onClick={e => {
                         const newReviewsLimit = reviewsLimit + nextReviewsToLoadCount
                         setReviewsLimit(newReviewsLimit)
                     }}>... more</button>

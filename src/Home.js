@@ -363,7 +363,7 @@ function Home({ Api }) {
                         {listActivities}
                         {/* <Activities activities = {activities} db={db} tasks={tasks}></Activities> */}
                     </ol>
-                    <button className="" style={{ 'paddingLeft': '50px', 'paddingRight': '50px', 'marginLeft': '50px' }} onClick={() => {
+                    <button className="load-more-button" onClick={() => {
                         let newDate = dateOffset + 1
                         setDateOffset(prev => newDate)
                         updateActivitiesAndRewards(Api.subscribeActivities)

@@ -135,6 +135,15 @@ ul {
   margin-left: 15px;
 }
 
+.load-more-button {
+  padding-left: 50px;
+  padding-right: 50px;
+  margin-left: 50px;
+}
+
+.load-more-button:hover {
+  cursor: pointer;
+}
 
 .check-icon-wrapper {
   width: 30px;
