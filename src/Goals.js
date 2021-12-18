@@ -95,9 +95,10 @@ function Goals({ Api }) {
             {getPrevReview(review)?.mark}
             <input min="0" max="10"
                 style={{ width: '30px', backgroundColor: getImprovementStyling(review, getPrevReview(review)) }}
+                class="review-mark-input"
                 type="number"
                 value={review.mark} onChange={e => Api.updateGoalReviewMark(review, e.target.value)} />
-            ===  {review.goal} ....... {review.date}
+            = {review.goal} ....... {review.date}
         </li>))
 
     const goalsList = goals
