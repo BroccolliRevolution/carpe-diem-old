@@ -268,3 +268,11 @@ ul {
   width: 45px;
   border: 1px solid #3e371e4f;
 }
+
+.btn-goals {
+  height: 35px;
+}
+
+.goals-screen-wrapper {
+  padding: 8px
+}

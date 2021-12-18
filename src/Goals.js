@@ -89,7 +89,6 @@ function Goals({ Api }) {
     }
 
     const showDate = (i) => {
-        if (i === 0) return ''
         const curr = goalsReviews[i]?.date
         const prev = goalsReviews[i - 1]?.date
 
@@ -198,8 +197,8 @@ function Goals({ Api }) {
     }
 
     return (
-        <div className="">
-            <button onClick={e => addNewGoalRewiew()} className="btn-main">+ NEW REVIEW</button>
+        <div className="goals-screen-wrapper">
+            <button onClick={e => addNewGoalRewiew()} className="btn-main btn-goals">+ NEW REVIEW</button>
             {/* <button onClick={e => saveAllOnce()} className="btn-main">Create All Goals</button> */}
             {addMode && <div className="add-goal">
                 <label htmlFor="goal-name-input">Add new Goal</label>
@@ -210,7 +209,7 @@ function Goals({ Api }) {
                 <input type="number" id="goal-order-input" onChange={e => setOrderOfNew(e.target.value)} value={orderOfNew} />
                 <button onClick={e => createNewGoal()} className="btn-main">add</button>
             </div>}
-            <button onClick={e => setAddMode(old => !old)} className="btn-main">{addMode ? 'Hide' : 'Add New Goal'}</button>
+            <button onClick={e => setAddMode(old => !old)} className="btn-main btn-goals">{addMode ? 'Hide' : 'Add New Goal'}</button>
             <div className="lists-wrapper">
                 <div className="reviews-list">
                     <ul>
