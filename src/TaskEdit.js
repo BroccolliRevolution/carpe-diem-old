@@ -7,6 +7,7 @@ function TasksEdit({ Api }) {
   const [type, setType] = useState('');
   const [tasks, setTasks] = useState([]);
   const [activetTasks, setActivetTasks] = useState([]);
+  const [typeFilter, setTypeFilter] = useState('');
 
   useEffect(() => {
     const update = allTasks => {
@@ -17,7 +18,10 @@ function TasksEdit({ Api }) {
     Api.subscribeTasks(update)
   }, []);
 
-  const tasksList = tasks.map((task, id) => (
+  const tasksList = tasks.filter(task => {
+    if (!typeFilter) return task
+    return task.type === typeFilter
+  }).map((task, id) => (
     <li key={id}>
       <input
         type="checkbox"
@@ -66,6 +70,15 @@ function TasksEdit({ Api }) {
 
       <div className="tasks-lists-wrapper">
         <div className="tasks-lists-edit">
+
+        <select id="lang" onChange={e => setTypeFilter(e.target.value)} value={typeFilter}>
+          <option value="">TYPE -- all</option>
+          <option value="dailies">dailies</option>
+          <option value="habits">habits</option>
+          <option value="chores">chores</option>
+          <option value="hobbies">hobbies</option>
+        </select>
+
           <h3>All Tasks</h3>
           <ul>
             {tasksList}
