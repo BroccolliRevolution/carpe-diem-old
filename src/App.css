@@ -22,11 +22,30 @@ ul {
   height: 80px;
 }
 
+.task-list-wrapper {
+  padding: 20px;
+}
+
+.tasks-filter {
+  margin: 1.2em;
+}
 
 .new-task {
   flex: 1 1 100%;
-  margin-top: 30px;
-  height: 80px;
+  display: flex;
+}
+
+.new-task-inputs label {
+  padding-right: 5px;
+}
+
+.new-task-preview span {
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.all-tasks-header {
+  display: flex;
 }
 
 .tasks-wrapper {

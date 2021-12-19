@@ -4,6 +4,7 @@ import './App.css';
 
 function TasksEdit({ Api }) {
   const [title, setTitle] = useState('');
+  const [partOfDay, setPartOfDay] = useState('');
   const [type, setType] = useState('');
   const [tasks, setTasks] = useState([]);
   const [activetTasks, setActivetTasks] = useState([]);
@@ -52,34 +53,50 @@ function TasksEdit({ Api }) {
     <div className="task-list-wrapper">
 
       <div className="new-task">
-        <label htmlFor="task-name-input">Add new task</label>
-        <input type="text" id="task-name-input" onKeyDown={handleKeyDown} onChange={e => setTitle(e.target.value)} value={title} />
+        <div className="new-task-inputs">
+          <label htmlFor="task-name-input">Add new task</label>
+          <input type="text" id="task-name-input" onKeyDown={handleKeyDown} onChange={e => setTitle(e.target.value)} value={title} />
 
-        <select id="lang" onChange={e => setType(e.target.value)} value={type}>
-          <option value="">TYPE</option>
-          <option value="dailies">dailies</option>
-          <option value="habits">habits</option>
-          <option value="chores">chores</option>
-          <option value="hobbies">hobbies</option>
-        </select>
+          <select id="task-type" onChange={e => setType(e.target.value)} value={type}>
+            <option value="">--TYPE--</option>
+            <option value="dailies">dailies</option>
+            <option value="habits">habits</option>
+            <option value="chores">chores</option>
+            <option value="hobbies">hobbies</option>
+          </select>
 
-        <button onClick={_ => Api.saveTask(title, type)}>UP</button>
-        <button onClick={_ => Api.saveTask(title, type)}>SAVE</button>
-        <p>{title} - {type}</p>
+          <select id="task-day-part" onChange={e => setPartOfDay(e.target.value)} value={partOfDay}>
+            <option value="">--part of the day--</option>
+            <option value="morning">morning</option>
+            <option value="afternoon">afternoon</option>
+            <option value="evening">evening</option>
+          </select>
+
+          <button onClick={_ => Api.saveTask(title, type, partOfDay)}>SAVE</button>
+        </div>
+        <div className="new-task-preview">
+          <span>{title}</span>
+          <span>{type}</span>
+          <span>{partOfDay}</span>
+        </div>
       </div>
 
       <div className="tasks-lists-wrapper">
         <div className="tasks-lists-edit">
 
-        <select id="lang" onChange={e => setTypeFilter(e.target.value)} value={typeFilter}>
-          <option value="">TYPE -- all</option>
-          <option value="dailies">dailies</option>
-          <option value="habits">habits</option>
-          <option value="chores">chores</option>
-          <option value="hobbies">hobbies</option>
-        </select>
+          <div className="all-tasks-header">
+            <h3>Tasks - {typeFilter || 'all'}</h3>
+            <div className="tasks-filter">
+              <select id="lang" onChange={e => setTypeFilter(e.target.value)} value={typeFilter}>
+                <option value="">TYPE -- all</option>
+                <option value="dailies">dailies</option>
+                <option value="habits">habits</option>
+                <option value="chores">chores</option>
+                <option value="hobbies">hobbies</option>
+              </select>
+            </div>
+          </div>
 
-          <h3>All Tasks</h3>
           <ul>
             {tasksList}
           </ul>

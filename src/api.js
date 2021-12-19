@@ -93,9 +93,9 @@ const api = () => {
             })
     }
 
-    const saveTask = (title, type) => {
-        if (title == '' || type == '') {
-            alert('set task and type')
+    const saveTask = (title, type, partOfDay) => {
+        if (title == '' || type == '' || partOfDay == '') {
+            alert('set task, type and day part')
             return
         }
         db.collection("tasks").doc(title).set({
@@ -105,7 +105,8 @@ const api = () => {
             isDaily: true,
             level: 1,
             order: 20,
-            type
+            type,
+            partOfDay
         })
     }
 
