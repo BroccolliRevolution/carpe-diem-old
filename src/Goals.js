@@ -39,9 +39,7 @@ function Goals({ Api }) {
 
     useEffect(() => {
         Api.subscribeGoals(goals => {
-
             setGoals(goals)
-
         })
     }, [])
 
@@ -99,19 +97,17 @@ function Goals({ Api }) {
     const reviewsList = goalsReviews
         .map((review, i) =>
         (
-            <>
-                {showDate(i) && <li className='reviews-date' key={i}>{showDate(i)}</li>}
-                <li key={review.id}>
-                    {getPrevReview(review)?.mark}
+            <li key={review.id + i}>
+                {showDate(i) && <div className='reviews-date' key={i}>{showDate(i)}</div>}
+                {getPrevReview(review)?.mark}
 
-                    <input min="0" max="10"
-                        style={{ width: '30px', backgroundColor: getImprovementStyling(review, getPrevReview(review)) }}
-                        class="review-mark-input"
-                        type="number"
-                        value={review.mark} onChange={e => Api.updateGoalReviewMark(review, e.target.value)} />
-                    = {getLevelOfMarkContent(review)} {review.goal}
-                </li>
-            </>
+                <input min="0" max="10"
+                    style={{ width: '30px', backgroundColor: getImprovementStyling(review, getPrevReview(review)) }}
+                    className="review-mark-input"
+                    type="number"
+                    value={review.mark} onChange={e => Api.updateGoalReviewMark(review, e.target.value)} />
+                = {getLevelOfMarkContent(review)} {review.goal}
+            </li>
         ))
 
     const goalsList = goals
